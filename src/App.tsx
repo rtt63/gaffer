@@ -109,13 +109,20 @@ function RightTeam({ mapSchematic, size }: MovebaleElementProps) {
   );
 }
 
+enum Mode {
+  Move,
+  Draw,
+  Erase,
+}
+
 function App() {
   const field = useRef();
   const canvasRef = useRef();
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
-  const [erasing, setErasing] = useState(false);
 
   const [grid, setGrid] = useState(null);
+
+  const [mode, setMode] = useState(Mode.Move);
 
   useEffect(() => {
     if (field.current) {
@@ -194,23 +201,13 @@ function App() {
     };
   }, []);
 
-  const togglePointerEvents = () => {
-    setPointerEventsDisabled(!isPointerEventsDisabled);
-  };
-  const toggleEraserMode = () => {
-    setErasing(!erasing);
+  const enableEraserMode = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    if (erasing) {
-      ctx.globalCompositeOperation = "source-over"; // Режим рисования поверх
-      ctx.strokeStyle = "black"; // Обычный цвет для рисования
-      ctx.lineWidth = 5;
-    } else {
-      ctx.globalCompositeOperation = "destination-out"; // Режим для стирания
-      ctx.strokeStyle = "black"; // Стираем только нарисованное черное
-      ctx.lineWidth = 50; // Размер "стерки"
-    }
+    ctx.globalCompositeOperation = "destination-out"; // Режим для стирания
+    ctx.strokeStyle = "black"; // Стираем только нарисованное черное
+    ctx.lineWidth = 50; // Размер "стерки"
   };
 
   return (
@@ -232,17 +229,49 @@ function App() {
           }}
         ></canvas>
       </div>
-      <label>
-        <input
-          type="checkbox"
-          checked={isPointerEventsDisabled}
-          onChange={togglePointerEvents}
-        />
-        Отключить взаимодействие с канвасом
-      </label>
-      <button onClick={toggleEraserMode}>
-        {erasing ? "Выключить стерку" : "Включить стерку"}
-      </button>
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="move"
+            checked={mode === Mode.Move}
+            onClick={() => {
+              // drawing = false;
+              setPointerEventsDisabled(true);
+              setMode(Mode.Move);
+            }}
+            value={Mode.Move}
+          />
+          Move (default)
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="draw"
+            checked={mode === Mode.Draw}
+            onClick={() => {
+              setMode(Mode.Draw);
+              setPointerEventsDisabled(false);
+            }}
+            value={Mode.Draw}
+          />
+          Draw
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="erase"
+            checked={mode === Mode.Erase}
+            onClick={() => {
+              setMode(Mode.Erase);
+              setPointerEventsDisabled(false);
+              enableEraserMode();
+            }}
+            value={Mode.Erase}
+          />
+          Erase
+        </label>
+      </div>
     </div>
   );
 }
