@@ -4,12 +4,22 @@ import Circle from "./components/Circle";
 
 import { createGrid } from "./utils/createGrid";
 
-const shiftInitialPosition = (size, { x, y }) => {
+interface Coords {
+  x: number;
+  y: number;
+}
+
+const shiftInitialPosition = (size: number, { x, y }: Coords): Coords => {
   const shift = size / 2;
   return { x: x - shift, y: y - shift };
 };
 
-function LeftTeam({ mapSchematic, size }) {
+interface MovebaleElementProps {
+  size: number;
+  mapSchematic: Map<string, { x: number; y: number }>;
+}
+
+function LeftTeam({ mapSchematic, size }: MovebaleElementProps) {
   const LB = mapSchematic.get("1-2");
   const LCB = mapSchematic.get("3-2");
   const RCB = mapSchematic.get("5-2");
@@ -27,19 +37,40 @@ function LeftTeam({ mapSchematic, size }) {
 
   return (
     <>
-      <Circle size={size} color="#F3EB00" {...shiftInitialPosition(size, GK)} />
-      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords) => (
+      {!!GK && (
         <Circle
           size={size}
-          color="#9A0000"
-          {...shiftInitialPosition(size, coords)}
+          background="#2DFF19"
+          {...shiftInitialPosition(size, GK)}
         />
-      ))}
+      )}
+      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords, i) =>
+        coords ? (
+          <Circle
+            key={i}
+            size={size}
+            background="#9A0000"
+            {...shiftInitialPosition(size, coords)}
+          />
+        ) : null
+      )}
     </>
   );
 }
 
-function RightTeam({ mapSchematic, size }) {
+function Ball({ mapSchematic, size }: MovebaleElementProps) {
+  const position = mapSchematic.get("4-9");
+
+  return (
+    <Circle
+      background="ball"
+      size={size}
+      {...shiftInitialPosition(size, position)}
+    />
+  );
+}
+
+function RightTeam({ mapSchematic, size }: MovebaleElementProps) {
   const LB = mapSchematic.get("7-16");
   const LCB = mapSchematic.get("3-16");
   const RCB = mapSchematic.get("5-16");
@@ -57,14 +88,23 @@ function RightTeam({ mapSchematic, size }) {
 
   return (
     <>
-      <Circle size={size} color="#F3EB00" {...shiftInitialPosition(size, GK)} />
-      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords) => (
+      {!!GK && (
         <Circle
           size={size}
-          color="#0D009A"
-          {...shiftInitialPosition(size, coords)}
+          background="#2DFF19"
+          {...shiftInitialPosition(size, GK)}
         />
-      ))}
+      )}
+      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords, i) =>
+        coords ? (
+          <Circle
+            key={i}
+            size={size}
+            background="#0D009A"
+            {...shiftInitialPosition(size, coords)}
+          />
+        ) : null
+      )}
     </>
   );
 }
@@ -84,18 +124,19 @@ function App() {
 
       const grid = createGrid({ width: fieldWidth, height: fieldHeight });
 
-      grid.forEach(({ x, y }, key) => {
-        const field = document.getElementById("field");
-        const elem = document.createElement("div");
-        elem.style.position = "absolute";
-        elem.style.width = "3px";
-        elem.style.height = "3px";
-        elem.innerText = key;
-        elem.style.backgroundColor = "black";
-        elem.style.left = `${x}px`;
-        elem.style.top = `${y}px`;
-        field?.appendChild(elem);
-      });
+      // DEV
+      // grid.forEach(({ x, y }, key) => {
+      //   const field = document.getElementById("field");
+      //   const elem = document.createElement("div");
+      //   elem.style.position = "absolute";
+      //   elem.style.width = "3px";
+      //   elem.style.height = "3px";
+      //   elem.innerText = key;
+      //   elem.style.backgroundColor = "black";
+      //   elem.style.left = `${x}px`;
+      //   elem.style.top = `${y}px`;
+      //   field?.appendChild(elem);
+      // });
 
       setGrid(grid);
     }
@@ -177,6 +218,7 @@ function App() {
       <div ref={field} id="field" className="field">
         {grid && <LeftTeam mapSchematic={grid} size={70} />}
         {grid && <RightTeam mapSchematic={grid} size={70} />}
+        {grid && <Ball mapSchematic={grid} size={30} />}
 
         <canvas
           ref={canvasRef}

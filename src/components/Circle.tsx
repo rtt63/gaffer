@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "../App.css";
+import ball from "../ball.svg";
 
 /*
  * Палитра
@@ -14,16 +15,16 @@ type CirclePosition = {
   y: number;
 };
 
-type Color = string;
+type Background = string;
 
 interface CircleProps {
-  color: Color;
+  background: Background;
   size: number;
   x: number;
   y: number;
 }
 
-function Circle({ color = "#0D009A", size, x, y }: CircleProps) {
+function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
   const [position, setPosition] = useState<CirclePosition>({ x, y });
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
@@ -65,7 +66,11 @@ function Circle({ color = "#0D009A", size, x, y }: CircleProps) {
   return (
     <div
       style={{
-        background: color,
+        backgroundColor: background === "ball" ? `#e2e2e2` : background,
+        backgroundImage: background === "ball" ? `url(${ball})` : "none",
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: size,
