@@ -150,6 +150,7 @@ function App() {
 
     // Инициализация канваса
     const canvas = canvasRef.current;
+
     const ctx = canvas.getContext("2d");
     canvas.width = field.current.offsetWidth;
     canvas.height = field.current.offsetHeight;
@@ -201,6 +202,14 @@ function App() {
     };
   }, []);
 
+  const enableDrawMode = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    ctx.globalCompositeOperation = "source-over"; // Режим рисования поверх
+    ctx.strokeStyle = "black"; // Обычный цвет для рисования
+    ctx.lineWidth = 5;
+  };
+
   const enableEraserMode = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -236,7 +245,6 @@ function App() {
             name="move"
             checked={mode === Mode.Move}
             onClick={() => {
-              // drawing = false;
               setPointerEventsDisabled(true);
               setMode(Mode.Move);
             }}
@@ -252,6 +260,7 @@ function App() {
             onClick={() => {
               setMode(Mode.Draw);
               setPointerEventsDisabled(false);
+              enableDrawMode();
             }}
             value={Mode.Draw}
           />
