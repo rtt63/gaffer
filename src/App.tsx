@@ -1,57 +1,81 @@
 import { useRef, useEffect, useState } from "react";
 import "./App.css";
 import Circle from "./components/Circle";
-import { Side } from "./constants";
 
 import { createGrid } from "./utils/createGrid";
 
-const size = 70;
-
-//*
-// Нужно поле поделить на зоны, чтобы получить набор точек. При инициализации эти точки будут фиксироваться в размер в пикселях
-// Получаем что каждая точка это как бы перекрестие, у нее есть свой адрес
-//
-// Соответственно в разных схемах по дефолту ставятся разные адреса
-// Такая хуйня по дефолту максимально должна давать 5, но так же 4, 3, 2 и 1. Важно что 5, 3 и 1 например имеют точку по середину, а 4 и 2 - нет, и надо чтобы такая точка тоже попадала и они были как бы равноудалены от центра. То есть детализация сетки должна быть достаточно мелкая
-//
-//
-
-const getLeftTeamPositions = ({ height, width }) => {
-  // defenders
-  const hStep = height / 5;
-  const wStep = width / 4;
-
-  const defsArray = new Array(4).fill(null).map((_, i) => ({
-    y: Math.floor(i * hStep + hStep),
-    x: Math.floor(1 * wStep),
-  }));
-
-  const h2s = height / 4;
-
-  const midsArray = new Array(3).fill(null).map((_, i) => ({
-    y: Math.floor(i * h2s + h2s),
-    x: Math.floor(2 * wStep),
-  }));
-
-  const forwardsArray = new Array(3).fill(null).map((_, i) => ({
-    y: Math.floor(i * h2s + h2s),
-    x: Math.floor(3 * wStep),
-  }));
-
-  const gk = { y: height / 2, x: 7 };
-
-  const team = [...defsArray, ...midsArray, ...forwardsArray];
-  return { gk, team };
+const shiftInitialPosition = (size, { x, y }) => {
+  const shift = size / 2;
+  return { x: x - shift, y: y - shift };
 };
 
-type Formation = "4-3-3";
+function LeftTeam({ mapSchematic, size }) {
+  const LB = mapSchematic.get("1-2");
+  const LCB = mapSchematic.get("3-2");
+  const RCB = mapSchematic.get("5-2");
+  const RB = mapSchematic.get("7-2");
+
+  const LCM = mapSchematic.get("2-5");
+  const CM = mapSchematic.get("4-5");
+  const RCM = mapSchematic.get("6-5");
+
+  const LW = mapSchematic.get("2-8");
+  const ST = mapSchematic.get("4-8");
+  const RW = mapSchematic.get("6-8");
+
+  const GK = mapSchematic.get("4-0");
+
+  return (
+    <>
+      <Circle size={size} color="#F3EB00" {...shiftInitialPosition(size, GK)} />
+      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords) => (
+        <Circle
+          size={size}
+          color="#9A0000"
+          {...shiftInitialPosition(size, coords)}
+        />
+      ))}
+    </>
+  );
+}
+
+function RightTeam({ mapSchematic, size }) {
+  const LB = mapSchematic.get("7-16");
+  const LCB = mapSchematic.get("3-16");
+  const RCB = mapSchematic.get("5-16");
+  const RB = mapSchematic.get("1-16");
+
+  const LCM = mapSchematic.get("6-13");
+  const CM = mapSchematic.get("4-13");
+  const RCM = mapSchematic.get("2-13");
+
+  const LW = mapSchematic.get("6-10");
+  const ST = mapSchematic.get("4-10");
+  const RW = mapSchematic.get("2-10");
+
+  const GK = mapSchematic.get("4-18");
+
+  return (
+    <>
+      <Circle size={size} color="#F3EB00" {...shiftInitialPosition(size, GK)} />
+      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords) => (
+        <Circle
+          size={size}
+          color="#0D009A"
+          {...shiftInitialPosition(size, coords)}
+        />
+      ))}
+    </>
+  );
+}
 
 function App() {
   const field = useRef();
   const canvasRef = useRef();
-  const [teamPositions, setPositions] = useState(null);
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
   const [erasing, setErasing] = useState(false);
+
+  const [grid, setGrid] = useState(null);
 
   useEffect(() => {
     if (field.current) {
@@ -60,25 +84,20 @@ function App() {
 
       const grid = createGrid({ width: fieldWidth, height: fieldHeight });
 
-      grid.forEach(({ x, y }) => {
-        console.log(x, y);
+      grid.forEach(({ x, y }, key) => {
         const field = document.getElementById("field");
         const elem = document.createElement("div");
         elem.style.position = "absolute";
         elem.style.width = "3px";
         elem.style.height = "3px";
+        elem.innerText = key;
         elem.style.backgroundColor = "black";
         elem.style.left = `${x}px`;
         elem.style.top = `${y}px`;
         field?.appendChild(elem);
       });
 
-      const team = getLeftTeamPositions({
-        height: field.current.offsetHeight,
-        width: field.current.offsetWidth / 2,
-      });
-
-      setPositions(team);
+      setGrid(grid);
     }
 
     // Инициализация канваса
@@ -156,17 +175,9 @@ function App() {
   return (
     <div>
       <div ref={field} id="field" className="field">
-        {teamPositions?.team?.map((props) => (
-          <Circle color="#9A0000" size={size} {...props} />
-        ))}
-        {teamPositions?.gk?.x && (
-          <Circle
-            color="#F3EB00"
-            size={size}
-            x={teamPositions?.gk?.x}
-            y={teamPositions?.gk?.y}
-          />
-        )}
+        {grid && <LeftTeam mapSchematic={grid} size={70} />}
+        {grid && <RightTeam mapSchematic={grid} size={70} />}
+
         <canvas
           ref={canvasRef}
           id="drawCanvas"
