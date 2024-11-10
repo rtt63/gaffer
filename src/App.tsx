@@ -1,114 +1,11 @@
 import { useRef, useEffect, useState } from "react";
 import getStroke from "perfect-freehand";
 import "./App.css";
-import Circle from "./components/Circle";
+import Ball from "./components/Ball";
+import { LeftTeam, RightTeam } from "./components/Teams";
 
 import { createGrid } from "./utils/createGrid";
-
-interface Coords {
-  x: number;
-  y: number;
-}
-
-const shiftInitialPosition = (size: number, { x, y }: Coords): Coords => {
-  const shift = size / 2;
-  return { x: x - shift, y: y - shift };
-};
-
-interface MovebaleElementProps {
-  size: number;
-  mapSchematic: Map<string, { x: number; y: number }>;
-}
-
-function LeftTeam({ mapSchematic, size }: MovebaleElementProps) {
-  const LB = mapSchematic.get("1-2");
-  const LCB = mapSchematic.get("3-2");
-  const RCB = mapSchematic.get("5-2");
-  const RB = mapSchematic.get("7-2");
-
-  const LCM = mapSchematic.get("2-5");
-  const CM = mapSchematic.get("4-5");
-  const RCM = mapSchematic.get("6-5");
-
-  const LW = mapSchematic.get("2-8");
-  const ST = mapSchematic.get("4-8");
-  const RW = mapSchematic.get("6-8");
-
-  const GK = mapSchematic.get("4-0");
-
-  return (
-    <>
-      {!!GK && (
-        <Circle
-          size={size}
-          background="#2DFF19"
-          {...shiftInitialPosition(size, GK)}
-        />
-      )}
-      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords, i) =>
-        coords ? (
-          <Circle
-            key={i}
-            size={size}
-            background="#9A0000"
-            {...shiftInitialPosition(size, coords)}
-          />
-        ) : null
-      )}
-    </>
-  );
-}
-
-function Ball({ mapSchematic, size }: MovebaleElementProps) {
-  const position = mapSchematic.get("4-9");
-
-  return (
-    <Circle
-      background="ball"
-      size={size}
-      {...shiftInitialPosition(size, position)}
-    />
-  );
-}
-
-function RightTeam({ mapSchematic, size }: MovebaleElementProps) {
-  const LB = mapSchematic.get("7-16");
-  const LCB = mapSchematic.get("3-16");
-  const RCB = mapSchematic.get("5-16");
-  const RB = mapSchematic.get("1-16");
-
-  const LCM = mapSchematic.get("6-13");
-  const CM = mapSchematic.get("4-13");
-  const RCM = mapSchematic.get("2-13");
-
-  const LW = mapSchematic.get("6-10");
-  const ST = mapSchematic.get("4-10");
-  const RW = mapSchematic.get("2-10");
-
-  const GK = mapSchematic.get("4-18");
-
-  return (
-    <>
-      {!!GK && (
-        <Circle
-          size={size}
-          background="#2DFF19"
-          {...shiftInitialPosition(size, GK)}
-        />
-      )}
-      {[LB, LCB, RCB, RB, LCM, CM, RCM, LW, ST, RW].map((coords, i) =>
-        coords ? (
-          <Circle
-            key={i}
-            size={size}
-            background="#0D009A"
-            {...shiftInitialPosition(size, coords)}
-          />
-        ) : null
-      )}
-    </>
-  );
-}
+import { Colors } from "./constants";
 
 enum Mode {
   Move,
@@ -116,16 +13,16 @@ enum Mode {
   Erase,
 }
 
+let points = [];
+
 function App() {
-  const field = useRef();
-  const canvasRef = useRef();
+  const field = useRef<HTMLElement>();
+  const canvasRef = useRef<HTMLCanvasElement>();
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
 
   const [grid, setGrid] = useState(null);
 
   const [mode, setMode] = useState(Mode.Move);
-
-  let points = [];
 
   useEffect(() => {
     if (field.current) {
@@ -151,28 +48,15 @@ function App() {
       setGrid(grid);
     }
 
-    // Инициализация канваса
     const canvas = canvasRef.current;
 
     const ctx = canvas.getContext("2d");
-    canvas.width = field.current.offsetWidth;
-    canvas.height = field.current.offsetHeight;
+    canvas.width = field.current?.offsetWidth;
+    canvas.height = field.current?.offsetHeight;
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
 
-    // Настроим канвас для рисования
-    ctx.globalCompositeOperation = "source-over"; // Режим рисования по умолчанию
-
-    // Устанавливаем начальную ширину линии для рисования
-    ctx.lineWidth = 5; // Начальная ширина линии
-
-    // Устанавливаем цвет рисования
-    ctx.strokeStyle = "black"; // Начальный цвет маркера
-
-    let drawing = false;
-
-    // Добавлено: обработчик начала рисования
     const startDrawing = (e) => {
       const canvasRect = canvas.getBoundingClientRect();
       const x = e.clientX - canvasRect.left;
@@ -188,11 +72,13 @@ function App() {
         points.push([x, y, e.pressure || 0.5]);
 
         const path = getStroke(points, {
-          size: 8,
+          size: 3,
           thinning: 0.7,
-          smoothing: 0.6,
+          smoothing: 0.9,
           streamline: 0.5,
         });
+
+        ctx.strokeStyle = Colors.Green;
 
         ctx.beginPath();
         path.forEach(([x, y], i) => {
@@ -204,16 +90,14 @@ function App() {
     };
 
     const stopDrawing = () => {
-      points = []; // Очищаем массив после завершения рисования
+      points = [];
     };
 
-    // Обработчики событий для рисования
     canvas.addEventListener("mousedown", startDrawing);
     canvas.addEventListener("mousemove", draw);
     canvas.addEventListener("mouseup", stopDrawing);
     canvas.addEventListener("mouseout", stopDrawing);
 
-    // Очистка событий при размонтировании компонента
     return () => {
       canvas.removeEventListener("mousedown", startDrawing);
       canvas.removeEventListener("mousemove", draw);
@@ -226,7 +110,6 @@ function App() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctx.globalCompositeOperation = "source-over"; // Режим рисования поверх
-    ctx.strokeStyle = "black"; // Обычный цвет для рисования
     ctx.lineWidth = 5;
   };
 
@@ -235,7 +118,6 @@ function App() {
     const ctx = canvas.getContext("2d");
 
     ctx.globalCompositeOperation = "destination-out"; // Режим для стирания
-    ctx.strokeStyle = "black"; // Стираем только нарисованное черное
     ctx.lineWidth = 50; // Размер "стерки"
   };
 

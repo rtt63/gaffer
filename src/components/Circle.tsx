@@ -2,14 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import "../App.css";
 import ball from "../ball.svg";
 
-/*
- * Палитра
- *
- * Синий #0D009A
- * Красный #9A0000
- * Зеленый #1D982D
- * */
-
 type CirclePosition = {
   x: number;
   y: number;
@@ -29,7 +21,7 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
-  const startDrag = (e: React.MouseEvent) => {
+  const startDrag = (e: MouseEvent) => {
     e.preventDefault();
     dragging.current = true;
 
@@ -39,7 +31,7 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
     };
   };
 
-  const onDrag = (e: React.MouseEvent) => {
+  const onDrag = (e: MouseEvent) => {
     if (!dragging.current) return;
     requestAnimationFrame(() => {
       setPosition({
