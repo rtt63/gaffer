@@ -3,6 +3,8 @@ import "./App.css";
 import Circle from "./components/Circle";
 import { Side } from "./constants";
 
+import { createGrid } from "./utils/createGrid";
+
 const size = 70;
 
 //*
@@ -13,30 +15,6 @@ const size = 70;
 // Такая хуйня по дефолту максимально должна давать 5, но так же 4, 3, 2 и 1. Важно что 5, 3 и 1 например имеют точку по середину, а 4 и 2 - нет, и надо чтобы такая точка тоже попадала и они были как бы равноудалены от центра. То есть детализация сетки должна быть достаточно мелкая
 //
 //
-
-function generateGrid(
-  width: number,
-  height: number,
-  rows: number,
-  cols: number
-) {
-  const grid = {};
-  const cellWidth = width / cols;
-  const cellHeight = height / rows;
-
-  // Создаём сетку
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const address = `${String.fromCharCode(65 + col)}${rows - row}`;
-      grid[address] = {
-        x: col * cellWidth + cellWidth / 2,
-        y: row * cellHeight + cellHeight / 2,
-      };
-    }
-  }
-
-  return grid;
-}
 
 const getLeftTeamPositions = ({ height, width }) => {
   // defenders
@@ -77,19 +55,28 @@ function App() {
 
   useEffect(() => {
     if (field.current) {
+      const fieldWidth = field.current.offsetWidth;
+      const fieldHeight = field.current.offsetHeight;
+
+      const grid = createGrid({ width: fieldWidth, height: fieldHeight });
+
+      grid.forEach(({ x, y }) => {
+        console.log(x, y);
+        const field = document.getElementById("field");
+        const elem = document.createElement("div");
+        elem.style.position = "absolute";
+        elem.style.width = "3px";
+        elem.style.height = "3px";
+        elem.style.backgroundColor = "black";
+        elem.style.left = `${x}px`;
+        elem.style.top = `${y}px`;
+        field?.appendChild(elem);
+      });
+
       const team = getLeftTeamPositions({
         height: field.current.offsetHeight,
         width: field.current.offsetWidth / 2,
       });
-
-      console.log(
-        generateGrid(
-          field.current.offsetWidth,
-          field.current.offsetHeight,
-          4,
-          3
-        )
-      );
 
       setPositions(team);
     }
@@ -168,7 +155,7 @@ function App() {
 
   return (
     <div>
-      <div ref={field} className="field">
+      <div ref={field} id="field" className="field">
         {teamPositions?.team?.map((props) => (
           <Circle color="#9A0000" size={size} {...props} />
         ))}
