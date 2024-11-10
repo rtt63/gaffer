@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import getStroke from "perfect-freehand";
 import "./App.css";
 import Circle from "./components/Circle";
 
@@ -124,6 +125,8 @@ function App() {
 
   const [mode, setMode] = useState(Mode.Move);
 
+  let points = [];
+
   useEffect(() => {
     if (field.current) {
       const fieldWidth = field.current.offsetWidth;
@@ -155,6 +158,9 @@ function App() {
     canvas.width = field.current.offsetWidth;
     canvas.height = field.current.offsetHeight;
 
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
     // Настроим канвас для рисования
     ctx.globalCompositeOperation = "source-over"; // Режим рисования по умолчанию
 
@@ -166,25 +172,39 @@ function App() {
 
     let drawing = false;
 
-    // Начало рисования
+    // Добавлено: обработчик начала рисования
     const startDrawing = (e) => {
-      drawing = true;
-      const rect = canvas.getBoundingClientRect(); // Получаем размеры канваса относительно страницы
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top); // Используем смещение канваса
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = e.clientX - canvasRect.left;
+      const y = e.clientY - canvasRect.top;
+      points = [[x, y, e.pressure || 0.5]];
     };
-    // Рисование линии
+
     const draw = (e) => {
-      if (drawing) {
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      if (points.length > 0) {
+        const canvasRect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvasRect.left;
+        const y = e.clientY - canvasRect.top;
+        points.push([x, y, e.pressure || 0.5]);
+
+        const path = getStroke(points, {
+          size: 8,
+          thinning: 0.7,
+          smoothing: 0.6,
+          streamline: 0.5,
+        });
+
+        ctx.beginPath();
+        path.forEach(([x, y], i) => {
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
         ctx.stroke();
       }
     };
 
-    // Окончание рисования
     const stopDrawing = () => {
-      drawing = false;
+      points = []; // Очищаем массив после завершения рисования
     };
 
     // Обработчики событий для рисования
