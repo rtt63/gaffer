@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "../App.css";
-import ball from "../ball.svg";
+import ball from "../assets/ball.svg";
 
 import { Coords } from "../constants";
 
