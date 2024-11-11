@@ -13,6 +13,7 @@ import { Colors, Format, Scheme, Side, Coords } from "./constants";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
+import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
 
 enum Mode {
   Move,
@@ -240,8 +241,6 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     }
   };
 
-  console.log(mode === Mode.Draw);
-
   return (
     <div>
       <div
@@ -307,6 +306,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
           <img src={eraserSvg} width="60" height="60" />
         </MenuButton>
       </div>
+      <ScreenOrientationBlocker />
     </div>
   );
 }

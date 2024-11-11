@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Format, Scheme, Side, Colors } from "../constants.ts";
+import ScreenOrientationBlocker from "./ScreenOrientationBlocker";
 
 interface Props {
   format: Format;
@@ -91,6 +92,7 @@ function InitialSchemeScreen({ format, setScheme, side }: Props) {
           </>
         )}
       </div>
+      <ScreenOrientationBlocker />
     </div>
   );
 }

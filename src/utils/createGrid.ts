@@ -35,8 +35,6 @@ const createGrid = ({ width, height }: params): ReturnMap => {
     }
   }
 
-  console.log(addresses);
-
   return addresses;
 };
 

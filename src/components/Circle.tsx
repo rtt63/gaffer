@@ -2,30 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import "../App.css";
 import ball from "../ball.svg";
 
-type CirclePosition = {
-  x: number;
-  y: number;
-};
+import { Coords } from "../constants";
 
 type Background = string;
 
-interface CircleProps {
-  background: Background;
-  size: number;
-  x: number;
-  y: number;
-}
+type CircleProps = { background: Background; size: number } & Coords;
 
-function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
-  const [position, setPosition] = useState<CirclePosition>({ x, y });
+function Circle({ background, size, x, y }: CircleProps) {
+  const [position, setPosition] = useState<Coords>({ x, y });
   const [isEditing, setEditing] = useState(false);
   const [formValue, setFormValue] = useState("");
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
-  const inputRef = useRef();
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const startDrag = (e: MouseEvent) => {
+  const startDrag: React.MouseEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
     dragging.current = true;
 
@@ -37,6 +29,7 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
 
   const onDrag = (e: MouseEvent) => {
     if (!dragging.current) return;
+
     requestAnimationFrame(() => {
       setPosition({
         x: e.clientX - offset.current.x,
@@ -50,14 +43,18 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
   };
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (inputRef.current && !inputRef.current.contains(event.target)) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
         inputRef.current.blur();
         setEditing(false);
       }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -93,7 +90,12 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
       className="obj"
     >
       {isEditing ? (
-        <form type="submit" onSubmit={() => setEditing(false)}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setEditing(false);
+          }}
+        >
           <input
             ref={inputRef}
             autoFocus={true}

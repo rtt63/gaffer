@@ -3,6 +3,10 @@ html {
   font-size: 18px;
 }
 
+input {
+  font-family: "Lexend", sans-serif;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -109,6 +113,7 @@ body {
   transition: all 100ms ease-in-out;
   position: relative;
   overflow: hidden;
+  min-width: 200px;
 
   &:hover {
     opacity: 0.8;
@@ -147,7 +152,7 @@ body {
   position: fixed;
   left: 50%;
   bottom: 0;
-  z-index: 999;
+  z-index: 999000;
   transform: translateX(-50%);
 }
 
@@ -272,6 +277,7 @@ body {
 .formation-select-buttons {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap-reverse;
   gap: 1rem;
   width: 100%;
   z-index: 6;
@@ -302,4 +308,60 @@ body {
 
 .erase-cursor {
   cursor: grabbing;
+}
+
+.screen-lock-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 999999999;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(12px);
+  color: #ffff00;
+  font-size: 2rem;
+  font-weight: 100;
+
+  background: rgb(3, 13, 0);
+  background: linear-gradient(
+    142deg,
+    rgba(3, 13, 0, 1) 0%,
+    rgba(4, 34, 0, 1) 37%,
+    rgba(36, 27, 0, 1) 65%,
+    rgba(78, 0, 0, 1) 100%
+  );
+
+  h2 {
+    margin: 0 0 1rem 0;
+    text-align: center;
+    padding: 0 2rem;
+    font-weight: 100;
+    font-size: 2rem;
+  }
+
+  span {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+}
+
+.lock-screen-icon-size {
+  width: 170px;
+  object-fit: contain;
+}
+
+.transform-90-deg {
+  transform: rotate(90deg);
+}
+
+.space-around {
+  margin: 2rem;
 }

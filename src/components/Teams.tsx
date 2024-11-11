@@ -245,7 +245,7 @@ const getPositionsForScheme = (
     if (side === Side.Right) {
       const defaultArray = [];
       let x = 0;
-      let y = size + 4;
+      const y = size + 4;
       for (let i = 0; i < 11; i += 1) {
         defaultArray.push({ x, y });
         x += size + 4;
@@ -269,7 +269,7 @@ const getPositionsForScheme = (
 
 type TeamProps = MovebaleElementProps & { scheme: Scheme };
 
-function LeftTeam({ mapSchematic, size, scheme = "4-3-3" }: TeamProps) {
+function LeftTeam({ mapSchematic, size, scheme }: TeamProps) {
   const GK = mapSchematic.get("4-0");
 
   return (
@@ -295,7 +295,7 @@ function LeftTeam({ mapSchematic, size, scheme = "4-3-3" }: TeamProps) {
   );
 }
 
-function RightTeam({ mapSchematic, size, scheme = "4-2-3-1" }: TeamProps) {
+function RightTeam({ mapSchematic, size, scheme }: TeamProps) {
   const GK = mapSchematic.get("4-18");
 
   return (
