@@ -295,3 +295,11 @@ body {
   font-size: 1rem;
   font-weight: 300;
 }
+
+.pencil-cursor {
+  cursor: pointer;
+}
+
+.erase-cursor {
+  cursor: grabbing;
+}

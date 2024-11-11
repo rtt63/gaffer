@@ -240,12 +240,14 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     }
   };
 
+  console.log(mode === Mode.Draw);
+
   return (
     <div>
       <div
         ref={field}
         id="field"
-        className="field"
+        className={"field"}
         style={{
           minWidth: fieldW,
           width: fieldW,
@@ -268,6 +270,10 @@ function Main({ leftScheme, rightScheme }: MainProps) {
             zIndex: 900,
             pointerEvents: isPointerEventsDisabled ? "none" : "auto",
           }}
+          className={clsx([
+            mode === Mode.Draw && "pencil-cursor",
+            mode === Mode.Erase && "erase-cursor",
+          ])}
         ></canvas>
       </div>
       <div className="menu">
