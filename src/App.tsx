@@ -9,7 +9,7 @@ import pencilSvg from "./assets/pencil.svg";
 import eraserSvg from "./assets/eraser.svg";
 
 import { createGrid } from "./utils/createGrid";
-import { Colors, Format, Scheme, Side } from "./constants";
+import { Colors, Format, Scheme, Side, Coords } from "./constants";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
@@ -23,19 +23,19 @@ enum Mode {
 enum SetupState {
   ChooseFormat,
   ChooseLeftTeamScheme,
-  ChooseLeftTeamColor,
   ChooseRightTeamScheme,
-  ChooseRightTeamColor,
   Main,
 }
 
-let points = [];
+type Point = [number, number, number];
+
+let points: Point[] = [];
 
 function App() {
   const [setupProgress, setSetupProgress] = useState(SetupState.ChooseFormat);
-  const [format, setFormat] = useState<Format>(null);
-  const [l_scheme, set_l_scheme] = useState<Scheme>(null);
-  const [r_scheme, set_r_scheme] = useState<Scheme>(null);
+  const [format, setFormat] = useState<Format | null>(null);
+  const [l_scheme, set_l_scheme] = useState<Scheme | null>(null);
+  const [r_scheme, set_r_scheme] = useState<Scheme | null>(null);
 
   if (setupProgress === SetupState.ChooseFormat) {
     return (
@@ -57,7 +57,7 @@ function App() {
     setSetupProgress(SetupState.Main);
   }
 
-  if (setupProgress === SetupState.ChooseLeftTeamScheme) {
+  if (setupProgress === SetupState.ChooseLeftTeamScheme && format !== null) {
     return (
       <InitialSchemeScreen
         side={Side.Left}
@@ -70,7 +70,7 @@ function App() {
     );
   }
 
-  if (setupProgress === SetupState.ChooseRightTeamScheme) {
+  if (setupProgress === SetupState.ChooseRightTeamScheme && format !== null) {
     return (
       <InitialSchemeScreen
         side={Side.Right}
@@ -83,10 +83,22 @@ function App() {
     );
   }
 
-  return <Main leftScheme={l_scheme} rightScheme={r_scheme} />;
+  if (l_scheme && r_scheme) {
+    return <Main leftScheme={l_scheme} rightScheme={r_scheme} />;
+  }
+
+  return null;
 }
 
-const MenuButton = ({ isChecked, onClick, children }) => {
+interface MainButtonProps {
+  isChecked: boolean;
+  onClick: () => void;
+}
+const MenuButton = ({
+  isChecked,
+  onClick,
+  children,
+}: React.PropsWithChildren<MainButtonProps>) => {
   return (
     <button
       onClick={onClick}
@@ -100,14 +112,19 @@ const MenuButton = ({ isChecked, onClick, children }) => {
   );
 };
 
-function Main({ leftScheme, rightScheme }) {
-  const field = useRef<HTMLElement>();
-  const canvasRef = useRef<HTMLCanvasElement>();
+interface MainProps {
+  leftScheme: Scheme;
+  rightScheme: Scheme;
+}
+
+function Main({ leftScheme, rightScheme }: MainProps) {
+  const field = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
 
-  const [fieldW, setFieldW] = useState("80vw");
+  const [fieldW, setFieldW] = useState("90vw");
 
-  const [grid, setGrid] = useState(null);
+  const [grid, setGrid] = useState<Map<string, Coords> | null>(null);
 
   const [mode, setMode] = useState(Mode.Move);
 
@@ -119,8 +136,6 @@ function Main({ leftScheme, rightScheme }) {
       const grid = createGrid({ width: fieldWidth, height: fieldHeight });
 
       setFieldW(`${fieldWidth}px`);
-      //
-      //
       // DEV
       // grid.forEach(({ x, y }, key) => {
       //   const field = document.getElementById("field");
@@ -140,26 +155,35 @@ function Main({ leftScheme, rightScheme }) {
 
     const canvas = canvasRef.current;
 
-    const ctx = canvas.getContext("2d");
-    canvas.width = field.current?.offsetWidth;
-    canvas.height = field.current?.offsetHeight;
+    const ctx = canvas?.getContext("2d");
+    if (canvas && field.current) {
+      canvas.width = field.current?.offsetWidth;
+      canvas.height = field.current?.offsetHeight;
+    }
 
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
+    if (ctx) {
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+    }
 
-    const startDrawing = (e) => {
+    const startDrawing = (e: MouseEvent) => {
+      const event = e as PointerEvent;
+      if (!canvas) {
+        return;
+      }
       const canvasRect = canvas.getBoundingClientRect();
-      const x = e.clientX - canvasRect.left;
-      const y = e.clientY - canvasRect.top;
-      points = [[x, y, e.pressure || 0.5]];
+      const x = event.clientX - canvasRect.left;
+      const y = event.clientY - canvasRect.top;
+      points = [[x, y, event.pressure || 0.5]];
     };
 
-    const draw = (e) => {
-      if (points.length > 0) {
+    const draw = (e: MouseEvent) => {
+      const event = e as PointerEvent;
+      if (points.length > 0 && canvas) {
         const canvasRect = canvas.getBoundingClientRect();
-        const x = e.clientX - canvasRect.left;
-        const y = e.clientY - canvasRect.top;
-        points.push([x, y, e.pressure || 0.5]);
+        const x = event.clientX - canvasRect.left;
+        const y = event.clientY - canvasRect.top;
+        points.push([x, y, event.pressure || 0.5]);
 
         const path = getStroke(points, {
           size: 3,
@@ -168,14 +192,16 @@ function Main({ leftScheme, rightScheme }) {
           streamline: 0.5,
         });
 
-        ctx.strokeStyle = Colors.Green;
+        if (ctx) {
+          ctx.strokeStyle = Colors.Green;
 
-        ctx.beginPath();
-        path.forEach(([x, y], i) => {
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        });
-        ctx.stroke();
+          ctx.beginPath();
+          path.forEach(([x, y], i) => {
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        }
       }
     };
 
@@ -183,32 +209,35 @@ function Main({ leftScheme, rightScheme }) {
       points = [];
     };
 
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mouseout", stopDrawing);
+    canvas?.addEventListener("mousedown", startDrawing);
+    canvas?.addEventListener("mousemove", draw);
+    canvas?.addEventListener("mouseup", stopDrawing);
+    canvas?.addEventListener("mouseout", stopDrawing);
 
     return () => {
-      canvas.removeEventListener("mousedown", startDrawing);
-      canvas.removeEventListener("mousemove", draw);
-      canvas.removeEventListener("mouseup", stopDrawing);
-      canvas.removeEventListener("mouseout", stopDrawing);
+      canvas?.removeEventListener("mousedown", startDrawing);
+      canvas?.removeEventListener("mousemove", draw);
+      canvas?.removeEventListener("mouseup", stopDrawing);
+      canvas?.removeEventListener("mouseout", stopDrawing);
     };
   }, []);
 
   const enableDrawMode = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctx.globalCompositeOperation = "source-over"; // Режим рисования поверх
-    ctx.lineWidth = 5;
+    const ctx = canvas?.getContext("2d");
+    if (ctx) {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.lineWidth = 5;
+    }
   };
 
   const enableEraserMode = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    ctx.globalCompositeOperation = "destination-out"; // Режим для стирания
-    ctx.lineWidth = 50;
+    const ctx = canvas?.getContext("2d");
+    if (ctx) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.lineWidth = 50;
+    }
   };
 
   return (
