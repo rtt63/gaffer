@@ -12,7 +12,8 @@ enum Side {
 const getPositionsForScheme = (
   map: Map<string, Coords>,
   scheme: Scheme,
-  side: Side
+  side: Side,
+  size: number
 ): Coords[] => {
   if (scheme === "4-3-3") {
     if (side === Side.Left) {
@@ -228,13 +229,39 @@ const getPositionsForScheme = (
     }
   }
 
+  if (scheme === "none") {
+    if (side === Side.Left) {
+      const defaultArray = [];
+
+      let x = 0;
+      const y = 0;
+      for (let i = 0; i < 11; i += 1) {
+        defaultArray.push({ x, y });
+        x += size + 4;
+      }
+
+      return defaultArray;
+    }
+    if (side === Side.Right) {
+      const defaultArray = [];
+      let x = 0;
+      let y = size + 4;
+      for (let i = 0; i < 11; i += 1) {
+        defaultArray.push({ x, y });
+        x += size + 4;
+      }
+
+      return defaultArray;
+    }
+  }
+
   const defaultArray = [];
 
   let x = 0;
   const y = 0;
   for (let i = 0; i < 11; i += 1) {
     defaultArray.push({ x, y });
-    x += 60;
+    x += size + 4;
   }
 
   return defaultArray;
@@ -254,7 +281,7 @@ function LeftTeam({ mapSchematic, size, scheme = "4-3-3" }: TeamProps) {
           {...shiftPosition(size, GK)}
         />
       )}
-      {getPositionsForScheme(mapSchematic, scheme, Side.Left).map(
+      {getPositionsForScheme(mapSchematic, scheme, Side.Left, size).map(
         (coords, i) => (
           <Circle
             key={i}
@@ -280,7 +307,7 @@ function RightTeam({ mapSchematic, size, scheme = "4-2-3-1" }: TeamProps) {
           {...shiftPosition(size, GK)}
         />
       )}
-      {getPositionsForScheme(mapSchematic, scheme, Side.Right).map(
+      {getPositionsForScheme(mapSchematic, scheme, Side.Right, size).map(
         (coords, i) => (
           <Circle
             key={i}

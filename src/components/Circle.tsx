@@ -18,8 +18,12 @@ interface CircleProps {
 
 function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
   const [position, setPosition] = useState<CirclePosition>({ x, y });
+  const [isEditing, setEditing] = useState(false);
+  const [formValue, setFormValue] = useState("");
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
+
+  const inputRef = useRef();
 
   const startDrag = (e: MouseEvent) => {
     e.preventDefault();
@@ -46,6 +50,20 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
   };
 
   useEffect(() => {
+    function handleClickOutside(event) {
+      if (inputRef.current && !inputRef.current.contains(event.target)) {
+        inputRef.current.blur();
+        setEditing(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
     window.addEventListener("mousemove", onDrag);
     window.addEventListener("mouseup", stopDrag);
 
@@ -57,6 +75,9 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
 
   return (
     <div
+      onDoubleClick={() => {
+        setEditing(true);
+      }}
       style={{
         backgroundColor: background === "ball" ? `#e2e2e2` : background,
         backgroundImage: background === "ball" ? `url(${ball})` : "none",
@@ -70,7 +91,27 @@ function Circle({ background = "#0D009A", size, x, y }: CircleProps) {
       }}
       onMouseDown={startDrag}
       className="obj"
-    ></div>
+    >
+      {isEditing ? (
+        <form type="submit" onSubmit={() => setEditing(false)}>
+          <input
+            ref={inputRef}
+            autoFocus={true}
+            type="text"
+            className="obj-input"
+            value={formValue}
+            onChange={(e) => {
+              if (e.target.value.length > 4) {
+                return;
+              }
+              setFormValue(e.target.value);
+            }}
+          />
+        </form>
+      ) : (
+        formValue
+      )}
+    </div>
   );
 }
 

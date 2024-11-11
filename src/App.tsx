@@ -209,9 +209,9 @@ function Main({ leftScheme, rightScheme }) {
   return (
     <div>
       <div ref={field} id="field" className="field">
-        {grid && <LeftTeam mapSchematic={grid} size={70} scheme={leftScheme} />}
+        {grid && <LeftTeam mapSchematic={grid} size={54} scheme={leftScheme} />}
         {grid && (
-          <RightTeam mapSchematic={grid} size={70} scheme={rightScheme} />
+          <RightTeam mapSchematic={grid} size={54} scheme={rightScheme} />
         )}
         {grid && <Ball mapSchematic={grid} size={30} />}
 
