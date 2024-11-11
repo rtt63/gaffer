@@ -163,11 +163,9 @@ const getPositionsForScheme = (
   return [{ x: 0, y: 0 }];
 };
 
-function LeftTeam({
-  mapSchematic,
-  size,
-  scheme = "4-3-3",
-}: MovebaleElementProps) {
+type TeamProps = MovebaleElementProps & { scheme: Scheme };
+
+function LeftTeam({ mapSchematic, size, scheme = "4-3-3" }: TeamProps) {
   const GK = mapSchematic.get("4-0");
 
   return (
@@ -193,11 +191,7 @@ function LeftTeam({
   );
 }
 
-function RightTeam({
-  mapSchematic,
-  size,
-  scheme = "4-2-3-1",
-}: MovebaleElementProps) {
+function RightTeam({ mapSchematic, size, scheme = "4-2-3-1" }: TeamProps) {
   const GK = mapSchematic.get("4-18");
 
   return (

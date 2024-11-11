@@ -89,3 +89,36 @@ body {
     color: #c3ff00;
   }
 }
+
+.menu {
+  display: flex;
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 999;
+  transform: translateX(-50%);
+}
+
+.menu-button {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+.menu-button-checked {
+  background: #a7ffa0;
+}
+
+.menu-button-inactive {
+  cursor: pointer;
+
+  img {
+    transition: transform 150ms ease-in-out;
+  }
+
+  &:hover {
+    img {
+      transform: scale(1.4);
+    }
+  }
+}

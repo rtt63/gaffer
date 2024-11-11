@@ -1,8 +1,12 @@
 import { useRef, useEffect, useState } from "react";
 import getStroke from "perfect-freehand";
+import clsx from "clsx";
 import "./App.css";
 import Ball from "./components/Ball";
 import { LeftTeam, RightTeam } from "./components/Teams";
+import circleSvg from "./assets/circle.svg";
+import pencilSvg from "./assets/pencil.svg";
+import eraserSvg from "./assets/eraser.svg";
 
 import { createGrid } from "./utils/createGrid";
 import { Colors, Format } from "./constants";
@@ -43,6 +47,20 @@ function App() {
 
   return <Main />;
 }
+
+const MenuButton = ({ isChecked, onClick, children }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={clsx([
+        "menu-button",
+        isChecked ? "menu-button-checked" : "menu-button-inactive",
+      ])}
+    >
+      {children}
+    </button>
+  );
+};
 
 function Main() {
   const field = useRef<HTMLElement>();
@@ -169,48 +187,36 @@ function Main() {
           }}
         ></canvas>
       </div>
-      <div>
-        <label>
-          <input
-            type="radio"
-            name="move"
-            checked={mode === Mode.Move}
-            onClick={() => {
-              setPointerEventsDisabled(true);
-              setMode(Mode.Move);
-            }}
-            value={Mode.Move}
-          />
-          Move (default)
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="draw"
-            checked={mode === Mode.Draw}
-            onClick={() => {
-              setMode(Mode.Draw);
-              setPointerEventsDisabled(false);
-              enableDrawMode();
-            }}
-            value={Mode.Draw}
-          />
-          Draw
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="erase"
-            checked={mode === Mode.Erase}
-            onClick={() => {
-              setMode(Mode.Erase);
-              setPointerEventsDisabled(false);
-              enableEraserMode();
-            }}
-            value={Mode.Erase}
-          />
-          Erase
-        </label>
+      <div className="menu">
+        <MenuButton
+          isChecked={mode === Mode.Move}
+          onClick={() => {
+            setPointerEventsDisabled(true);
+            setMode(Mode.Move);
+          }}
+        >
+          <img src={circleSvg} width="60" height="60" />
+        </MenuButton>
+        <MenuButton
+          isChecked={mode === Mode.Draw}
+          onClick={() => {
+            setMode(Mode.Draw);
+            setPointerEventsDisabled(false);
+            enableDrawMode();
+          }}
+        >
+          <img src={pencilSvg} width="60" height="60" />
+        </MenuButton>
+        <MenuButton
+          isChecked={mode === Mode.Erase}
+          onClick={() => {
+            setMode(Mode.Erase);
+            setPointerEventsDisabled(false);
+            enableEraserMode();
+          }}
+        >
+          <img src={eraserSvg} width="60" height="60" />
+        </MenuButton>
       </div>
     </div>
   );
