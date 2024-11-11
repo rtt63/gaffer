@@ -105,6 +105,8 @@ function Main({ leftScheme, rightScheme }) {
   const canvasRef = useRef<HTMLCanvasElement>();
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
 
+  const [fieldW, setFieldW] = useState("80vw");
+
   const [grid, setGrid] = useState(null);
 
   const [mode, setMode] = useState(Mode.Move);
@@ -116,6 +118,9 @@ function Main({ leftScheme, rightScheme }) {
 
       const grid = createGrid({ width: fieldWidth, height: fieldHeight });
 
+      setFieldW(`${fieldWidth}px`);
+      //
+      //
       // DEV
       // grid.forEach(({ x, y }, key) => {
       //   const field = document.getElementById("field");
@@ -203,12 +208,21 @@ function Main({ leftScheme, rightScheme }) {
     const ctx = canvas.getContext("2d");
 
     ctx.globalCompositeOperation = "destination-out"; // Режим для стирания
-    ctx.lineWidth = 50; // Размер "стерки"
+    ctx.lineWidth = 50;
   };
 
   return (
     <div>
-      <div ref={field} id="field" className="field">
+      <div
+        ref={field}
+        id="field"
+        className="field"
+        style={{
+          minWidth: fieldW,
+          width: fieldW,
+          maxWidth: fieldW,
+        }}
+      >
         {grid && <LeftTeam mapSchematic={grid} size={54} scheme={leftScheme} />}
         {grid && (
           <RightTeam mapSchematic={grid} size={54} scheme={rightScheme} />
