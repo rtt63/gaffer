@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import clsx from "clsx";
 import "../App.css";
+
 import ball from "../assets/ball.svg";
 
 import { Coords } from "../constants";
@@ -77,9 +79,6 @@ function Circle({ background, size, x, y }: CircleProps) {
       }}
       style={{
         backgroundColor: background === "ball" ? `#e2e2e2` : background,
-        backgroundImage: background === "ball" ? `url(${ball})` : "none",
-        backgroundSize: "contain",
-        backgroundPosition: "center",
 
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -87,7 +86,7 @@ function Circle({ background, size, x, y }: CircleProps) {
         height: size,
       }}
       onMouseDown={startDrag}
-      className="obj"
+      className={clsx(["obj", background === "ball" && "ball-img"])}
     >
       {isEditing ? (
         <form

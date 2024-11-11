@@ -51,3 +51,9 @@
   );
   pointer-events: none; /* Блик не мешает перетаскиванию */
 }
+
+.ball-img {
+  background-image: url("./assets/ball.svg");
+  background-size: cover;
+  background-position: center;
+}
