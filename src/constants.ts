@@ -25,7 +25,7 @@ type Scheme =
   | "1-2-1"
   | "2-2"
   | "3-3"
-  | "skip";
+  | "none";
 
 enum Colors {
   Red = "#9A0000",
