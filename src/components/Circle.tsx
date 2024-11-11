@@ -77,7 +77,6 @@ function Circle({ background, size, x, y }: CircleProps) {
       }}
       style={{
         backgroundColor: background === "ball" ? `#e2e2e2` : background,
-
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: size,
