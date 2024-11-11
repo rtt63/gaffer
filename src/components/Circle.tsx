@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import "../App.css";
 
-import ball from "../assets/ball.svg";
-
 import { Coords } from "../constants";
 
 type Background = string;
