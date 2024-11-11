@@ -3,15 +3,19 @@ enum Side {
   Right,
 }
 
-type Formation = "4-3-3";
-interface MovebaleElementProps {
-  size: number;
-  mapSchematic: Map<string, { x: number; y: number }>;
+enum Format {
+  Five,
+  Seven,
+  Eleven,
 }
-
 interface Coords {
   x: number;
   y: number;
+}
+type Formation = "4-3-3";
+interface MovebaleElementProps {
+  size: number;
+  mapSchematic: Map<string, Coords>;
 }
 
 enum Colors {
@@ -24,5 +28,5 @@ enum Colors {
   Black = "#001320",
 }
 
-export { Side, Colors };
+export { Side, Colors, Format };
 export type { Coords, Formation, MovebaleElementProps };

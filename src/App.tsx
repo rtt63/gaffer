@@ -5,7 +5,9 @@ import Ball from "./components/Ball";
 import { LeftTeam, RightTeam } from "./components/Teams";
 
 import { createGrid } from "./utils/createGrid";
-import { Colors } from "./constants";
+import { Colors, Format } from "./constants";
+
+import WelcomeScreen from "./screens/WelcomeScreen";
 
 enum Mode {
   Move,
@@ -13,9 +15,36 @@ enum Mode {
   Erase,
 }
 
+enum SetupState {
+  ChooseFormat,
+  ChooseLeftTeamScheme,
+  ChooseLeftTeamColor,
+  ChooseRightTeamScheme,
+  ChooseRightTeamColor,
+  Main,
+}
+
 let points = [];
 
 function App() {
+  const [setupProgress, setSetupProgress] = useState(SetupState.ChooseFormat);
+  const [format, setFormat] = useState<Format>(null);
+
+  if (setupProgress === SetupState.ChooseFormat) {
+    return (
+      <WelcomeScreen
+        setFormat={(fmt) => {
+          setFormat(fmt);
+          setSetupProgress(SetupState.Main);
+        }}
+      />
+    );
+  }
+
+  return <Main />;
+}
+
+function Main() {
   const field = useRef<HTMLElement>();
   const canvasRef = useRef<HTMLCanvasElement>();
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
@@ -124,8 +153,8 @@ function App() {
   return (
     <div>
       <div ref={field} id="field" className="field">
-        {grid && <LeftTeam mapSchematic={grid} size={70} />}
-        {grid && <RightTeam mapSchematic={grid} size={70} />}
+        {grid && <LeftTeam mapSchematic={grid} size={70} scheme="4-2-3-1" />}
+        {grid && <RightTeam mapSchematic={grid} size={70} scheme="4-3-3" />}
         {grid && <Ball mapSchematic={grid} size={30} />}
 
         <canvas
