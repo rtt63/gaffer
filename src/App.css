@@ -37,6 +37,7 @@ body {
   background-position: center;
   background-size: contain;
   pointer-events: none;
+  box-shadow: 0 16px 60px -10px #052f49;
 }
 
 #drawCanvas {
@@ -69,20 +70,31 @@ body {
   cursor: pointer;
   font-weight: 800;
   font-size: 4rem;
+  transition: all 0.5s ease-in-out;
 }
 
 .five {
-  background: #31003d;
-  color: white;
+  background: #ff9500;
+
+  &:hover {
+    background: black;
+    color: #ff9500;
+  }
 }
 
 .seven {
-  background: #74aed5;
+  /* background: #74aed5; */
+  background: #f0ffe4;
+
+  &:hover {
+    background: black;
+    color: #74aed5;
+  }
 }
 
 .eleven {
-  background: #c3ff00;
-  transition: all 0.5s ease-in-out;
+  /* background: #c3ff00; */
+  background: #d70000;
 
   &:hover {
     background: black;
@@ -107,6 +119,10 @@ body {
 
 .menu-button-checked {
   background: #a7ffa0;
+
+  img {
+    transform: scale(1.4);
+  }
 }
 
 .menu-button-inactive {
@@ -121,4 +137,91 @@ body {
       transform: scale(1.4);
     }
   }
+}
+
+.initial-screen-scheme-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #001320;
+  color: white;
+}
+.initial-screen-scheme-container.left-side {
+  padding-right: 10vw;
+}
+.initial-screen-scheme-container.right-side {
+  padding-left: 10vw;
+}
+
+.choose-format-button {
+  border: none;
+  padding: 2rem;
+  width: 100vw;
+  max-width: 640px;
+  font-size: 2rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    background: #a7ffa0;
+  }
+}
+
+.choose-format-button + .choose-format-button {
+  margin-top: 4px;
+}
+
+.side-choose-title {
+  font-weight: 200;
+  font-size: 3rem;
+  margin-top: 0;
+  padding-top: 0;
+
+  b {
+    font-weight: 800;
+    text-transform: uppercase;
+    /* color: #9a0000; */
+  }
+}
+
+.gaffer-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0 2rem 0.5rem 0;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+
+  h1 {
+    font-size: 7rem;
+    margin: 0;
+    padding: 0;
+    font-weight: 100;
+    opacity: 0.4;
+  }
+
+  span {
+    margin: 0;
+    padding: 0;
+    font-size: 2rem;
+    font-weight: 200;
+    opacity: 0.2;
+  }
+}
+
+.formation-question {
+  position: fixed;
+  top: 1rem;
+  left: 2rem;
+  color: #001320;
+  margin: 0;
+  font-size: 3rem;
 }

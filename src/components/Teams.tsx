@@ -2,14 +2,12 @@ import Circle from "./Circle";
 import { shiftPosition } from "../utils/shiftPosition";
 import { MovebaleElementProps } from "../constants";
 
-import { Colors, Coords } from "../constants";
+import { Colors, Coords, Scheme } from "../constants";
 
 enum Side {
   Left,
   Right,
 }
-
-type Scheme = "4-3-3" | "4-2-3-1" | "4-4-2" | "3-4-3";
 
 const getPositionsForScheme = (
   map: Map<string, Coords>,
@@ -160,7 +158,86 @@ const getPositionsForScheme = (
     }
   }
 
-  return [{ x: 0, y: 0 }];
+  if (scheme === "1-2-1") {
+    if (side === Side.Left) {
+      const CB = map.get("4-2");
+
+      const LM = map.get("2-5");
+      const RM = map.get("6-5");
+
+      const ST = map.get("4-8");
+
+      return [CB, LM, RM, ST].filter((v) => !!v);
+    }
+    if (side === Side.Right) {
+      const CB = map.get("4-16");
+
+      const LM = map.get("6-13");
+      const RM = map.get("2-13");
+
+      const ST = map.get("4-10");
+
+      return [CB, LM, RM, ST].filter((v) => !!v);
+    }
+  }
+
+  if (scheme === "2-2") {
+    if (side === Side.Left) {
+      const LB = map.get("2-2");
+      const RB = map.get("6-2");
+
+      const LS = map.get("2-6");
+      const RS = map.get("6-6");
+
+      return [LB, RB, LS, RS].filter((v) => !!v);
+    }
+    if (side === Side.Right) {
+      const LB = map.get("2-16");
+      const RB = map.get("6-16");
+
+      const LS = map.get("2-12");
+      const RS = map.get("6-12");
+
+      return [LB, RB, LS, RS].filter((v) => !!v);
+    }
+  }
+
+  if (scheme === "3-3") {
+    if (side === Side.Left) {
+      const LB = map.get("2-3");
+      const CB = map.get("4-3");
+      const RB = map.get("6-3");
+
+      const LW = map.get("2-7");
+      const ST = map.get("4-7");
+      const RW = map.get("6-7");
+
+      return [LB, CB, RB, LW, ST, RW].filter((v) => !!v);
+    }
+
+    if (side === Side.Right) {
+      const LB = map.get("2-15");
+      const CB = map.get("4-15");
+      const RB = map.get("6-15");
+
+      const LW = map.get("2-11");
+      const ST = map.get("4-11");
+      const RW = map.get("6-11");
+
+      return [LB, CB, RB, LW, ST, RW].filter((v) => !!v);
+    }
+  }
+
+  const defaultArray = [];
+
+  let x = 0;
+  const y = 0;
+  for (let i = 0; i < 11; i += 1) {
+    defaultArray.push({ x, y });
+    x += 60;
+  }
+
+  return defaultArray;
 };
 
 type TeamProps = MovebaleElementProps & { scheme: Scheme };

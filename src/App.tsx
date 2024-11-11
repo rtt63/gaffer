@@ -9,9 +9,10 @@ import pencilSvg from "./assets/pencil.svg";
 import eraserSvg from "./assets/eraser.svg";
 
 import { createGrid } from "./utils/createGrid";
-import { Colors, Format } from "./constants";
+import { Colors, Format, Scheme, Side } from "./constants";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
+import InitialSchemeScreen from "./screens/InitialSchemeScreen";
 
 enum Mode {
   Move,
@@ -33,19 +34,56 @@ let points = [];
 function App() {
   const [setupProgress, setSetupProgress] = useState(SetupState.ChooseFormat);
   const [format, setFormat] = useState<Format>(null);
+  const [l_scheme, set_l_scheme] = useState<Scheme>(null);
+  const [r_scheme, set_r_scheme] = useState<Scheme>(null);
 
   if (setupProgress === SetupState.ChooseFormat) {
     return (
       <WelcomeScreen
         setFormat={(fmt) => {
           setFormat(fmt);
+          setSetupProgress(SetupState.ChooseLeftTeamScheme);
+        }}
+      />
+    );
+  }
+
+  if (
+    setupProgress === SetupState.ChooseLeftTeamScheme &&
+    format === Format.Seven
+  ) {
+    set_l_scheme("3-3");
+    set_r_scheme("3-3");
+    setSetupProgress(SetupState.Main);
+  }
+
+  if (setupProgress === SetupState.ChooseLeftTeamScheme) {
+    return (
+      <InitialSchemeScreen
+        side={Side.Left}
+        format={format}
+        setScheme={(scheme) => {
+          set_l_scheme(scheme);
+          setSetupProgress(SetupState.ChooseRightTeamScheme);
+        }}
+      />
+    );
+  }
+
+  if (setupProgress === SetupState.ChooseRightTeamScheme) {
+    return (
+      <InitialSchemeScreen
+        side={Side.Right}
+        format={format}
+        setScheme={(scheme) => {
+          set_r_scheme(scheme);
           setSetupProgress(SetupState.Main);
         }}
       />
     );
   }
 
-  return <Main />;
+  return <Main leftScheme={l_scheme} rightScheme={r_scheme} />;
 }
 
 const MenuButton = ({ isChecked, onClick, children }) => {
@@ -62,7 +100,7 @@ const MenuButton = ({ isChecked, onClick, children }) => {
   );
 };
 
-function Main() {
+function Main({ leftScheme, rightScheme }) {
   const field = useRef<HTMLElement>();
   const canvasRef = useRef<HTMLCanvasElement>();
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
@@ -171,8 +209,10 @@ function Main() {
   return (
     <div>
       <div ref={field} id="field" className="field">
-        {grid && <LeftTeam mapSchematic={grid} size={70} scheme="4-2-3-1" />}
-        {grid && <RightTeam mapSchematic={grid} size={70} scheme="4-3-3" />}
+        {grid && <LeftTeam mapSchematic={grid} size={70} scheme={leftScheme} />}
+        {grid && (
+          <RightTeam mapSchematic={grid} size={70} scheme={rightScheme} />
+        )}
         {grid && <Ball mapSchematic={grid} size={30} />}
 
         <canvas
