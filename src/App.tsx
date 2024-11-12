@@ -10,7 +10,15 @@ import eraserSvg from "./assets/eraser.svg";
 
 import { createGrid } from "./utils/createGrid";
 import { getDeviceSize } from "./utils/getDeviceSize.ts";
-import { Colors, Format, Scheme, Side, Coords, DeviceSize } from "./constants";
+import {
+  Colors,
+  Format,
+  Scheme,
+  Side,
+  Coords,
+  DeviceSize,
+  Presets,
+} from "./constants";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
@@ -183,6 +191,8 @@ function Main({ leftScheme, rightScheme }: MainProps) {
 
   const [mode, setMode] = useState(Mode.Move);
 
+  const [preset, setPreset] = useState<Presets>(Presets.Preset1);
+
   useEffect(() => {
     if (field.current) {
       const fieldWidth = field.current.offsetWidth;
@@ -238,6 +248,26 @@ function Main({ leftScheme, rightScheme }: MainProps) {
       ];
     };
 
+    const drawPath = (path: number[][], ctx: CanvasRenderingContext2D) => {
+      ctx.beginPath();
+      path.forEach(([x, y], i) => {
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+
+      ctx.stroke();
+    };
+
+    const getStrokeOptions = {
+      size: 0.1,
+      thinning: 2,
+      smoothing: 9,
+      streamline: 0.5,
+    };
+
     const draw = (e: MouseEvent | TouchEvent) => {
       const event = e as PointerEvent | TouchEvent;
 
@@ -259,26 +289,11 @@ function Main({ leftScheme, rightScheme }: MainProps) {
           event instanceof MouseEvent ? event.pressure || 0.5 : 0.5,
         ]);
 
-        const path = getStroke(points, {
-          size: 0.1,
-          thinning: 2,
-          smoothing: 9,
-          streamline: 0.5,
-        });
+        const path = getStroke(points, getStrokeOptions);
 
         if (ctx) {
           ctx.strokeStyle = Colors.Green;
-
-          ctx.beginPath();
-          path.forEach(([x, y], i) => {
-            if (i === 0) {
-              ctx.moveTo(x, y);
-            } else {
-              ctx.lineTo(x, y);
-            }
-          });
-
-          ctx.stroke();
+          drawPath(path, ctx);
         }
       }
     };
@@ -310,12 +325,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
         const preset = JSON.parse(restoredPreset);
 
         for (const [type, width, points] of preset) {
-          const path = getStroke(points, {
-            size: 0.1,
-            thinning: 2,
-            smoothing: 9,
-            streamline: 0.5,
-          });
+          const path = getStroke(points, getStrokeOptions);
 
           if (ctx) {
             if (type === CanvasMode.Pencil) {
@@ -328,16 +338,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
               ctx.lineWidth = width;
             }
 
-            ctx.beginPath();
-            path.forEach(([x, y], i) => {
-              if (i === 0) {
-                ctx.moveTo(x, y);
-              } else {
-                ctx.lineTo(x, y);
-              }
-            });
-
-            ctx.stroke();
+            drawPath(path, ctx);
           }
         }
       }
@@ -398,13 +399,15 @@ function Main({ leftScheme, rightScheme }: MainProps) {
               mapSchematic={grid}
               size={playerSize}
               scheme={leftScheme}
+              currentPreset={preset}
             />
             <RightTeam
               mapSchematic={grid}
               size={playerSize}
               scheme={rightScheme}
+              currentPreset={preset}
             />
-            <Ball mapSchematic={grid} size={ballSize} />
+            <Ball mapSchematic={grid} size={ballSize} currentPreset={preset} />
           </>
         )}
 

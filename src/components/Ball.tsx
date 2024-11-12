@@ -5,11 +5,18 @@ import { shiftPosition } from "../utils/shiftPosition";
 
 const defaultPosition: Coords = { x: 40, y: 40 };
 
-function Ball({ mapSchematic, size }: MovebaleElementProps) {
+type Props = { currentPreset: string } & MovebaleElementProps;
+
+function Ball({ mapSchematic, size, currentPreset }: Props) {
   const position = mapSchematic.get("4-9") || defaultPosition;
 
   return (
-    <Circle background="ball" size={size} {...shiftPosition(size, position)} />
+    <Circle
+      id={`${currentPreset}-ball`}
+      background="ball"
+      size={size}
+      {...shiftPosition(size, position)}
+    />
   );
 }
 

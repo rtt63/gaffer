@@ -22,7 +22,11 @@ enum DeviceSize {
   M,
   L,
 }
-
+enum Presets {
+  Preset1 = "Preset1",
+  Preset2 = "Preset2",
+  Preset3 = "Preset3",
+}
 type Scheme =
   | "4-3-3"
   | "4-2-3-1"
@@ -43,5 +47,5 @@ enum Colors {
   Black = "#001320",
 }
 
-export { Side, Colors, Format, DeviceSize };
+export { Side, Colors, Format, DeviceSize, Presets };
 export type { Coords, MovebaleElementProps, Scheme };

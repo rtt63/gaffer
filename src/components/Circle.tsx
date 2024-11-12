@@ -6,9 +6,13 @@ import { Coords } from "../constants";
 
 type Background = string;
 
-type CircleProps = { background: Background; size: number } & Coords;
+type CircleProps = {
+  background: Background;
+  size: number;
+  id: string;
+} & Coords;
 
-function Circle({ background, size, x, y }: CircleProps) {
+function Circle({ background, size, x, y, id }: CircleProps) {
   const [position, setPosition] = useState<Coords>({ x, y });
   const [isEditing, setEditing] = useState(false);
   const [formValue, setFormValue] = useState("");
@@ -32,6 +36,7 @@ function Circle({ background, size, x, y }: CircleProps) {
     dragging.current = true;
 
     const touch = e.touches[0];
+
     offset.current = {
       x: touch.clientX - position.x,
       y: touch.clientY - position.y,
@@ -52,9 +57,12 @@ function Circle({ background, size, x, y }: CircleProps) {
     });
   };
 
-  const stopDrag = () => {
-    dragging.current = false;
-  };
+  useEffect(() => {
+    const prefedinedPosition = localStorage.getItem(id);
+    if (prefedinedPosition) {
+      setPosition(JSON.parse(prefedinedPosition));
+    }
+  }, [id]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent | TouchEvent) {
@@ -77,6 +85,11 @@ function Circle({ background, size, x, y }: CircleProps) {
   }, []);
 
   useEffect(() => {
+    const stopDrag = () => {
+      dragging.current = false;
+      localStorage.setItem(id, JSON.stringify(position));
+    };
+
     window.addEventListener("mousemove", onDrag);
     window.addEventListener("mouseup", stopDrag);
 
@@ -90,7 +103,7 @@ function Circle({ background, size, x, y }: CircleProps) {
       window.removeEventListener("touchmove", onDrag);
       window.removeEventListener("touchend", stopDrag);
     };
-  }, []);
+  }, [id, position]);
 
   return (
     <div
