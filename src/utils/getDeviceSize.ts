@@ -7,7 +7,7 @@ const getDeviceSize = (): DeviceSize => {
     return DeviceSize.S;
   }
 
-  if (w < 1400) {
+  if (w < 1100) {
     return DeviceSize.M;
   }
 

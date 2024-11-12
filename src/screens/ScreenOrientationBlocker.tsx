@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import turnarrow from "../assets/turnarrow.svg";
 import tablet from "../assets/tablet.svg";
 import display from "../assets/display.svg";
 
@@ -23,19 +22,21 @@ function ScreenOrientationBlocker() {
   if (isPortrait) {
     return (
       <div className="screen-lock-container">
-        <h2>You need a landscape mode like this</h2>
-        <img className="lock-screen-icon-size" src={`${display}`} />
-        <span>or this</span>
-        <img
-          className="lock-screen-icon-size transform-90-deg"
-          src={`${tablet}`}
-        />
-        <img
-          src={`${turnarrow}`}
-          className="lock-screen-icon-size space-around"
-        />
-        <span>Not like this</span>
-        <img className="lock-screen-icon-size" src={`${tablet}`} />
+        <div>
+          <h2>You need a landscape mode like this</h2>
+          <div className="good-examples">
+            <img className="lock-screen-icon-size" src={`${display}`} />
+            <span>or this</span>
+            <img
+              className="lock-screen-icon-size transform-90-deg"
+              src={`${tablet}`}
+            />
+          </div>
+        </div>
+        <div className="bad-examples">
+          <span className="space-top">Not like this</span>
+          <img className="lock-screen-icon-size" src={`${tablet}`} />
+        </div>
       </div>
     );
   }

@@ -22,7 +22,7 @@ const getPlayerSize = (): number => {
   const size = getDeviceSize();
 
   if (size === DeviceSize.S) return 28;
-  if (size === DeviceSize.M) return 38;
+  if (size === DeviceSize.M) return 44;
   return 54;
 };
 
@@ -181,20 +181,6 @@ function Main({ leftScheme, rightScheme }: MainProps) {
         maxHeight: fieldHeight + "px",
       });
 
-      // DEV
-      // grid.forEach(({ x, y }, key) => {
-      //   const field = document.getElementById("field");
-      //   const elem = document.createElement("div");
-      //   elem.style.position = "absolute";
-      //   elem.style.width = "3px";
-      //   elem.style.height = "3px";
-      //   elem.innerText = key;
-      //   elem.style.backgroundColor = "black";
-      //   elem.style.left = `${x}px`;
-      //   elem.style.top = `${y}px`;
-      //   field?.appendChild(elem);
-      // });
-
       setGrid(grid);
     }
 
@@ -225,6 +211,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
         "touches" in event
           ? event.touches[0].clientY - rect.top
           : event.clientY - rect.top;
+
       points = [
         [x, y, event instanceof MouseEvent ? event.pressure || 0.5 : 0.5],
       ];
@@ -242,6 +229,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
           "touches" in event
             ? event.touches[0].clientY - rect.top
             : event.clientY - rect.top;
+
         points.push([
           x,
           y,
@@ -272,7 +260,16 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     };
 
     const stopDrawing = () => {
-      points = [];
+      try {
+        const prev = localStorage.getItem("preset");
+        const prev_tr = prev ? JSON.parse(prev) : [];
+        const upd = [...prev_tr, ...points];
+        localStorage.setItem("preset", JSON.stringify(upd));
+      } catch (e) {
+        console.log(e);
+      } finally {
+        points = [];
+      }
     };
 
     canvas?.addEventListener("mousedown", startDrawing);

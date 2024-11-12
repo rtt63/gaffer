@@ -36,10 +36,9 @@ function WelcomeScreen({ setFormat }: Props) {
             </button>
           </div>
           <span className="mechanics-notification">
-            We provide the most basic starters out of the box, but general
-            mechanics are the same
+            Use big screens for the best experience
           </span>
-          <span>It's just a whiteboard</span>
+          <span>Like a real whiteboard</span>
         </div>
         <div className="gaffer-title">
           <h1>GAFFER</h1>
