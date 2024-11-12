@@ -167,24 +167,42 @@ function Main({ leftScheme, rightScheme }: MainProps) {
       ctx.lineJoin = "round";
     }
 
-    const startDrawing = (e: MouseEvent) => {
-      const event = e as PointerEvent;
+    const startDrawing = (e: MouseEvent | TouchEvent) => {
+      const event = e as PointerEvent | TouchEvent;
       if (!canvas) {
         return;
       }
-      const canvasRect = canvas.getBoundingClientRect();
-      const x = event.clientX - canvasRect.left;
-      const y = event.clientY - canvasRect.top;
-      points = [[x, y, event.pressure || 0.5]];
+      const rect = canvas!.getBoundingClientRect();
+      const x =
+        "touches" in event
+          ? event.touches[0].clientX - rect.left
+          : event.clientX - rect.left;
+      const y =
+        "touches" in event
+          ? event.touches[0].clientY - rect.top
+          : event.clientY - rect.top;
+      points = [
+        [x, y, event instanceof MouseEvent ? event.pressure || 0.5 : 0.5],
+      ];
     };
 
-    const draw = (e: MouseEvent) => {
-      const event = e as PointerEvent;
+    const draw = (e: MouseEvent | TouchEvent) => {
+      const event = e as PointerEvent | TouchEvent;
       if (points.length > 0 && canvas) {
-        const canvasRect = canvas.getBoundingClientRect();
-        const x = event.clientX - canvasRect.left;
-        const y = event.clientY - canvasRect.top;
-        points.push([x, y, event.pressure || 0.5]);
+        const rect = canvas.getBoundingClientRect();
+        const x =
+          "touches" in event
+            ? event.touches[0].clientX - rect.left
+            : event.clientX - rect.left;
+        const y =
+          "touches" in event
+            ? event.touches[0].clientY - rect.top
+            : event.clientY - rect.top;
+        points.push([
+          x,
+          y,
+          event instanceof MouseEvent ? event.pressure || 0.5 : 0.5,
+        ]);
 
         const path = getStroke(points, {
           size: 3,
@@ -198,8 +216,11 @@ function Main({ leftScheme, rightScheme }: MainProps) {
 
           ctx.beginPath();
           path.forEach(([x, y], i) => {
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
           });
           ctx.stroke();
         }
@@ -215,11 +236,21 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     canvas?.addEventListener("mouseup", stopDrawing);
     canvas?.addEventListener("mouseout", stopDrawing);
 
+    canvas?.addEventListener("touchstart", startDrawing);
+    canvas?.addEventListener("touchmove", draw);
+    canvas?.addEventListener("touchend", stopDrawing);
+    canvas?.addEventListener("touchcancel", stopDrawing);
+
     return () => {
       canvas?.removeEventListener("mousedown", startDrawing);
       canvas?.removeEventListener("mousemove", draw);
       canvas?.removeEventListener("mouseup", stopDrawing);
       canvas?.removeEventListener("mouseout", stopDrawing);
+
+      canvas?.removeEventListener("touchstart", startDrawing);
+      canvas?.removeEventListener("touchmove", draw);
+      canvas?.removeEventListener("touchend", stopDrawing);
+      canvas?.removeEventListener("touchcancel", stopDrawing);
     };
   }, []);
 
