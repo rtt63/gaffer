@@ -17,6 +17,12 @@ interface MovebaleElementProps {
   mapSchematic: Map<string, Coords>;
 }
 
+enum DeviceSize {
+  S,
+  M,
+  L,
+}
+
 type Scheme =
   | "4-3-3"
   | "4-2-3-1"
@@ -37,5 +43,5 @@ enum Colors {
   Black = "#001320",
 }
 
-export { Side, Colors, Format };
+export { Side, Colors, Format, DeviceSize };
 export type { Coords, MovebaleElementProps, Scheme };

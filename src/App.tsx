@@ -9,13 +9,27 @@ import pencilSvg from "./assets/pencil.svg";
 import eraserSvg from "./assets/eraser.svg";
 
 import { createGrid } from "./utils/createGrid";
-import { Colors, Format, Scheme, Side, Coords } from "./constants";
+import { getDeviceSize } from "./utils/getDeviceSize.ts";
+import { Colors, Format, Scheme, Side, Coords, DeviceSize } from "./constants";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
 import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
 
 import { isWideScreen } from "./utils/isWideScreen";
+
+const getPlayerSize = (): number => {
+  const size = getDeviceSize();
+
+  if (size === DeviceSize.S) return 28;
+  if (size === DeviceSize.M) return 38;
+  return 54;
+};
+
+const getBallSize = () => getPlayerSize() / 2;
+
+const playerSize = getPlayerSize();
+const ballSize = getBallSize();
 
 enum Mode {
   Move,
@@ -235,9 +249,9 @@ function Main({ leftScheme, rightScheme }: MainProps) {
         ]);
 
         const path = getStroke(points, {
-          size: 3,
-          thinning: 0.7,
-          smoothing: 0.9,
+          size: 0.1,
+          thinning: 2,
+          smoothing: 9,
           streamline: 0.5,
         });
 
@@ -289,7 +303,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     const ctx = canvas?.getContext("2d");
     if (ctx) {
       ctx.globalCompositeOperation = "source-over";
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 4;
     }
   };
 
@@ -305,11 +319,23 @@ function Main({ leftScheme, rightScheme }: MainProps) {
   return (
     <div>
       <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>
-        {grid && <LeftTeam mapSchematic={grid} size={54} scheme={leftScheme} />}
+        <div className="warning">Please, do not shrink window from now on</div>
+
         {grid && (
-          <RightTeam mapSchematic={grid} size={54} scheme={rightScheme} />
+          <>
+            <LeftTeam
+              mapSchematic={grid}
+              size={playerSize}
+              scheme={leftScheme}
+            />
+            <RightTeam
+              mapSchematic={grid}
+              size={playerSize}
+              scheme={rightScheme}
+            />
+            <Ball mapSchematic={grid} size={ballSize} />
+          </>
         )}
-        {grid && <Ball mapSchematic={grid} size={30} />}
 
         <canvas
           ref={canvasRef}
@@ -327,6 +353,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
           ])}
         ></canvas>
       </div>
+
       <div className="menu">
         <MenuButton
           isChecked={mode === Mode.Move}
