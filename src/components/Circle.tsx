@@ -27,13 +27,27 @@ function Circle({ background, size, x, y }: CircleProps) {
     };
   };
 
-  const onDrag = (e: MouseEvent) => {
+  const startTouchDrag: React.TouchEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    dragging.current = true;
+
+    const touch = e.touches[0];
+    offset.current = {
+      x: touch.clientX - position.x,
+      y: touch.clientY - position.y,
+    };
+  };
+
+  const onDrag = (e: MouseEvent | TouchEvent) => {
     if (!dragging.current) return;
+
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
     requestAnimationFrame(() => {
       setPosition({
-        x: e.clientX - offset.current.x,
-        y: e.clientY - offset.current.y,
+        x: clientX - offset.current.x,
+        y: clientY - offset.current.y,
       });
     });
   };
@@ -54,9 +68,11 @@ function Circle({ background, size, x, y }: CircleProps) {
     }
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, []);
 
@@ -64,9 +80,15 @@ function Circle({ background, size, x, y }: CircleProps) {
     window.addEventListener("mousemove", onDrag);
     window.addEventListener("mouseup", stopDrag);
 
+    window.addEventListener("touchmove", onDrag, { passive: false });
+    window.addEventListener("touchend", stopDrag);
+
     return () => {
       window.removeEventListener("mousemove", onDrag);
       window.removeEventListener("mouseup", stopDrag);
+
+      window.removeEventListener("touchmove", onDrag);
+      window.removeEventListener("touchend", stopDrag);
     };
   }, []);
 
@@ -83,6 +105,7 @@ function Circle({ background, size, x, y }: CircleProps) {
         height: size,
       }}
       onMouseDown={startDrag}
+      onTouchStart={startTouchDrag}
       className={clsx(["obj", background === "ball" && "ball-img"])}
     >
       {isEditing ? (
