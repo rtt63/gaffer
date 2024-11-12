@@ -15,6 +15,8 @@ import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
 import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
 
+import { isWideScreen } from "./utils/isWideScreen";
+
 enum Mode {
   Move,
   Draw,
@@ -118,12 +120,32 @@ interface MainProps {
   rightScheme: Scheme;
 }
 
+type FixedHeightStyles = {
+  minHeight: string;
+  height: string;
+  maxHeight: string;
+};
+type FixedWidthStyles = {
+  minWidth: string;
+  width: string;
+  maxWidth: string;
+};
+type FixedWidthAndHeightStyles = FixedWidthStyles & FixedHeightStyles;
+type FieldFixedSizes =
+  | FixedWidthStyles
+  | FixedHeightStyles
+  | FixedWidthAndHeightStyles;
+
 function Main({ leftScheme, rightScheme }: MainProps) {
   const field = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
 
-  const [fieldW, setFieldW] = useState("90vw");
+  const [fieldFixedSizes, setFieldFixedSizes] = useState<FieldFixedSizes>(
+    isWideScreen()
+      ? { minHeight: "90vh", height: "90vh", maxHeight: "90vh" }
+      : { minWidth: "80vw", width: "80vw", maxWidth: "80vw" }
+  );
 
   const [grid, setGrid] = useState<Map<string, Coords> | null>(null);
 
@@ -136,7 +158,15 @@ function Main({ leftScheme, rightScheme }: MainProps) {
 
       const grid = createGrid({ width: fieldWidth, height: fieldHeight });
 
-      setFieldW(`${fieldWidth}px`);
+      setFieldFixedSizes({
+        minWidth: fieldWidth + "px",
+        width: fieldWidth + "px",
+        maxWidth: fieldWidth + "px",
+        minHeight: fieldHeight + "px",
+        height: fieldHeight + "px",
+        maxHeight: fieldHeight + "px",
+      });
+
       // DEV
       // grid.forEach(({ x, y }, key) => {
       //   const field = document.getElementById("field");
@@ -274,16 +304,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
 
   return (
     <div>
-      <div
-        ref={field}
-        id="field"
-        className={"field"}
-        style={{
-          minWidth: fieldW,
-          width: fieldW,
-          maxWidth: fieldW,
-        }}
-      >
+      <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>
         {grid && <LeftTeam mapSchematic={grid} size={54} scheme={leftScheme} />}
         {grid && (
           <RightTeam mapSchematic={grid} size={54} scheme={rightScheme} />

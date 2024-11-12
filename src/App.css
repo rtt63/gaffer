@@ -26,7 +26,6 @@ body {
   z-index: 2;
   position: relative;
   margin: 0 auto;
-  width: 80vw;
   aspect-ratio: 2000 / 1297;
 
   background: rgb(235, 248, 255);
