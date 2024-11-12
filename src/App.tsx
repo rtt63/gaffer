@@ -44,9 +44,27 @@ enum SetupState {
   Main,
 }
 
-type Point = [number, number, number];
+enum CanvasMode {
+  EraserTool = "destination-out",
+  Pencil = "source-over",
+}
 
-let points: Point[] = [];
+type Points = [number, number, number];
+
+let points: Points[] = [];
+
+type Width = number;
+
+function memorizePreset(
+  name: string,
+  points: [CanvasMode, Width, Points[]]
+): void {
+  const prev = localStorage.getItem(name) || "[]";
+  const trPrev = JSON.parse(prev);
+  const upd = [...trPrev, points];
+  const strUpd = JSON.stringify(upd);
+  localStorage.setItem(name, strUpd);
+}
 
 function App() {
   const [setupProgress, setSetupProgress] = useState(SetupState.ChooseFormat);
@@ -199,10 +217,13 @@ function Main({ leftScheme, rightScheme }: MainProps) {
 
     const startDrawing = (e: MouseEvent | TouchEvent) => {
       const event = e as PointerEvent | TouchEvent;
+
       if (!canvas) {
         return;
       }
+
       const rect = canvas!.getBoundingClientRect();
+
       const x =
         "touches" in event
           ? event.touches[0].clientX - rect.left
@@ -219,8 +240,10 @@ function Main({ leftScheme, rightScheme }: MainProps) {
 
     const draw = (e: MouseEvent | TouchEvent) => {
       const event = e as PointerEvent | TouchEvent;
+
       if (points.length > 0 && canvas) {
         const rect = canvas.getBoundingClientRect();
+
         const x =
           "touches" in event
             ? event.touches[0].clientX - rect.left
@@ -254,23 +277,73 @@ function Main({ leftScheme, rightScheme }: MainProps) {
               ctx.lineTo(x, y);
             }
           });
+
           ctx.stroke();
         }
       }
     };
 
     const stopDrawing = () => {
-      try {
-        const prev = localStorage.getItem("preset");
-        const prev_tr = prev ? JSON.parse(prev) : [];
-        const upd = [...prev_tr, ...points];
-        localStorage.setItem("preset", JSON.stringify(upd));
-      } catch (e) {
-        console.log(e);
-      } finally {
-        points = [];
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+
+      if (ctx && ctx?.globalCompositeOperation && ctx?.lineWidth) {
+        const new_list: [CanvasMode, Width, Points[]] = [
+          ctx?.globalCompositeOperation as CanvasMode,
+          ctx?.lineWidth as Width,
+          points as Points[],
+        ];
+
+        memorizePreset("preset1", new_list);
+      }
+
+      points = [];
+    };
+
+    const restoreDrawing = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+
+      const restoredPreset = localStorage.getItem("preset1");
+
+      if (restoredPreset) {
+        const preset = JSON.parse(restoredPreset);
+
+        for (const [type, width, points] of preset) {
+          const path = getStroke(points, {
+            size: 0.1,
+            thinning: 2,
+            smoothing: 9,
+            streamline: 0.5,
+          });
+
+          if (ctx) {
+            if (type === CanvasMode.Pencil) {
+              ctx.strokeStyle = Colors.Green;
+              ctx.globalCompositeOperation = type;
+              ctx.imageSmoothingQuality = "high";
+              ctx.lineWidth = width;
+            } else if (type === CanvasMode.EraserTool) {
+              ctx.globalCompositeOperation = type;
+              ctx.lineWidth = width;
+            }
+
+            ctx.beginPath();
+            path.forEach(([x, y], i) => {
+              if (i === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            });
+
+            ctx.stroke();
+          }
+        }
       }
     };
+
+    restoreDrawing();
 
     canvas?.addEventListener("mousedown", startDrawing);
     canvas?.addEventListener("mousemove", draw);
@@ -299,7 +372,8 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx) {
-      ctx.globalCompositeOperation = "source-over";
+      ctx.globalCompositeOperation = CanvasMode.Pencil;
+      ctx.imageSmoothingQuality = "high";
       ctx.lineWidth = 4;
     }
   };
@@ -308,7 +382,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx) {
-      ctx.globalCompositeOperation = "destination-out";
+      ctx.globalCompositeOperation = CanvasMode.EraserTool;
       ctx.lineWidth = 50;
     }
   };
