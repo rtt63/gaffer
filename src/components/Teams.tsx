@@ -270,19 +270,34 @@ const getPositionsForScheme = (
 type TeamProps = MovebaleElementProps & {
   scheme: Scheme;
   currentPreset: Presets;
+  width: number;
+  height: number;
 };
 
-const generateId = (id: number | string, side: Side, preset: Presets): string =>
-  `${side}-${preset}-${id}`;
+const generateId = (
+  id: number | string,
+  side: Side,
+  preset: Presets,
+  scheme: Scheme,
+  w: number,
+  h: number
+): string => `${scheme}-${side}-${preset}-${id}-${w}-${h}`;
 
-function LeftTeam({ mapSchematic, size, scheme, currentPreset }: TeamProps) {
+function LeftTeam({
+  mapSchematic,
+  size,
+  scheme,
+  currentPreset,
+  width,
+  height,
+}: TeamProps) {
   const GK = mapSchematic.get("4-0");
 
   return (
     <>
       {!!GK && (
         <Circle
-          id={generateId("gk", Side.Left, currentPreset)}
+          id={generateId("gk", Side.Left, currentPreset, scheme, width, height)}
           size={size}
           background={Colors.Yellow}
           {...shiftPosition(size, GK)}
@@ -291,8 +306,8 @@ function LeftTeam({ mapSchematic, size, scheme, currentPreset }: TeamProps) {
       {getPositionsForScheme(mapSchematic, scheme, Side.Left, size).map(
         (coords, i) => (
           <Circle
-            key={generateId(i, Side.Left, currentPreset)}
-            id={generateId(i, Side.Left, currentPreset)}
+            key={generateId(i, Side.Left, currentPreset, scheme, width, height)}
+            id={generateId(i, Side.Left, currentPreset, scheme, width, height)}
             size={size}
             background={Colors.Red}
             {...shiftPosition(size, coords)}
@@ -303,14 +318,28 @@ function LeftTeam({ mapSchematic, size, scheme, currentPreset }: TeamProps) {
   );
 }
 
-function RightTeam({ mapSchematic, size, scheme, currentPreset }: TeamProps) {
+function RightTeam({
+  mapSchematic,
+  size,
+  scheme,
+  currentPreset,
+  width,
+  height,
+}: TeamProps) {
   const GK = mapSchematic.get("4-18");
 
   return (
     <>
       {!!GK && (
         <Circle
-          id={generateId("gk", Side.Right, currentPreset)}
+          id={generateId(
+            "gk",
+            Side.Right,
+            currentPreset,
+            scheme,
+            width,
+            height
+          )}
           size={size}
           background={Colors.Orange}
           {...shiftPosition(size, GK)}
@@ -319,8 +348,15 @@ function RightTeam({ mapSchematic, size, scheme, currentPreset }: TeamProps) {
       {getPositionsForScheme(mapSchematic, scheme, Side.Right, size).map(
         (coords, i) => (
           <Circle
-            key={generateId(i, Side.Right, currentPreset)}
-            id={generateId(i, Side.Right, currentPreset)}
+            key={generateId(
+              i,
+              Side.Right,
+              currentPreset,
+              scheme,
+              width,
+              height
+            )}
+            id={generateId(i, Side.Right, currentPreset, scheme, width, height)}
             size={size}
             background={Colors.SkyBlue}
             {...shiftPosition(size, coords)}

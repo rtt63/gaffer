@@ -18,6 +18,7 @@ import {
   Coords,
   DeviceSize,
   Presets,
+  CanvasMode,
 } from "./constants";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -25,6 +26,7 @@ import InitialSchemeScreen from "./screens/InitialSchemeScreen";
 import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
 
 import { isWideScreen } from "./utils/isWideScreen";
+import { saveCanvasState, restoreCanvasState } from "./utils/memo";
 
 const getPlayerSize = (): number => {
   const size = getDeviceSize();
@@ -52,27 +54,11 @@ enum SetupState {
   Main,
 }
 
-enum CanvasMode {
-  EraserTool = "destination-out",
-  Pencil = "source-over",
-}
-
 type Points = [number, number, number];
 
 let points: Points[] = [];
 
 type Width = number;
-
-function memorizePreset(
-  name: string,
-  points: [CanvasMode, Width, Points[]]
-): void {
-  const prev = localStorage.getItem(name) || "[]";
-  const trPrev = JSON.parse(prev);
-  const upd = [...trPrev, points];
-  const strUpd = JSON.stringify(upd);
-  localStorage.setItem(name, strUpd);
-}
 
 function App() {
   const [setupProgress, setSetupProgress] = useState(SetupState.ChooseFormat);
@@ -308,8 +294,18 @@ function Main({ leftScheme, rightScheme }: MainProps) {
           ctx?.lineWidth as Width,
           points as Points[],
         ];
-
-        memorizePreset("preset1", new_list);
+        if (field.current) {
+          const w = field.current.offsetWidth;
+          const h = field.current.offsetHeight;
+          saveCanvasState({
+            preset,
+            sl: leftScheme,
+            sr: rightScheme,
+            w,
+            h,
+            points: new_list,
+          });
+        }
       }
 
       points = [];
@@ -319,26 +315,37 @@ function Main({ leftScheme, rightScheme }: MainProps) {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
 
-      const restoredPreset = localStorage.getItem("preset1");
+      if (field.current) {
+        const w = field.current.offsetWidth;
+        const h = field.current.offsetHeight;
 
-      if (restoredPreset) {
-        const preset = JSON.parse(restoredPreset);
+        const restoredPreset = restoreCanvasState({
+          sl: leftScheme,
+          sr: rightScheme,
+          preset,
+          h,
+          w,
+        });
 
-        for (const [type, width, points] of preset) {
-          const path = getStroke(points, getStrokeOptions);
+        if (restoredPreset) {
+          const preset = restoredPreset;
 
-          if (ctx) {
-            if (type === CanvasMode.Pencil) {
-              ctx.strokeStyle = Colors.Green;
-              ctx.globalCompositeOperation = type;
-              ctx.imageSmoothingQuality = "high";
-              ctx.lineWidth = width;
-            } else if (type === CanvasMode.EraserTool) {
-              ctx.globalCompositeOperation = type;
-              ctx.lineWidth = width;
+          for (const [type, width, points] of preset) {
+            const path = getStroke(points, getStrokeOptions);
+
+            if (ctx) {
+              if (type === CanvasMode.Pencil) {
+                ctx.strokeStyle = Colors.Green;
+                ctx.globalCompositeOperation = type;
+                ctx.imageSmoothingQuality = "high";
+                ctx.lineWidth = width;
+              } else if (type === CanvasMode.EraserTool) {
+                ctx.globalCompositeOperation = type;
+                ctx.lineWidth = width;
+              }
+
+              drawPath(path, ctx);
             }
-
-            drawPath(path, ctx);
           }
         }
       }
@@ -367,7 +374,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
       canvas?.removeEventListener("touchend", stopDrawing);
       canvas?.removeEventListener("touchcancel", stopDrawing);
     };
-  }, []);
+  }, [preset]);
 
   const enableDrawMode = () => {
     const canvas = canvasRef.current;
@@ -388,10 +395,40 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     }
   };
 
+  console.log(preset);
+
   return (
     <div>
       <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>
-        <div className="warning">Please, do not shrink window from now on</div>
+        <div className="presets">
+          <button
+            className={clsx([
+              "preset-button",
+              preset === Presets.Preset1 && "preset-button-active",
+            ])}
+            onClick={() => setPreset(Presets.Preset1)}
+          >
+            Preset 1
+          </button>
+          <button
+            className={clsx([
+              "preset-button",
+              preset === Presets.Preset2 && "preset-button-active",
+            ])}
+            onClick={() => setPreset(Presets.Preset2)}
+          >
+            Preset 2
+          </button>
+          <button
+            className={clsx([
+              "preset-button",
+              preset === Presets.Preset3 && "preset-button-active",
+            ])}
+            onClick={() => setPreset(Presets.Preset3)}
+          >
+            Preset 3
+          </button>
+        </div>
 
         {grid && (
           <>
@@ -400,14 +437,25 @@ function Main({ leftScheme, rightScheme }: MainProps) {
               size={playerSize}
               scheme={leftScheme}
               currentPreset={preset}
+              width={Number(field.current?.offsetWidth)}
+              height={Number(field.current?.offsetHeight)}
             />
             <RightTeam
               mapSchematic={grid}
               size={playerSize}
               scheme={rightScheme}
               currentPreset={preset}
+              width={Number(field.current?.offsetWidth)}
+              height={Number(field.current?.offsetHeight)}
             />
-            <Ball mapSchematic={grid} size={ballSize} currentPreset={preset} />
+            <Ball
+              mapSchematic={grid}
+              size={ballSize}
+              currentPreset={preset}
+              scheme={`${leftScheme}_${rightScheme}`}
+              width={Number(field.current?.offsetWidth)}
+              height={Number(field.current?.offsetHeight)}
+            />
           </>
         )}
 

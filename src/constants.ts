@@ -46,6 +46,10 @@ enum Colors {
   Orange = "#FF9D00",
   Black = "#001320",
 }
+enum CanvasMode {
+  EraserTool = "destination-out",
+  Pencil = "source-over",
+}
 
-export { Side, Colors, Format, DeviceSize, Presets };
+export { Side, Colors, Format, DeviceSize, Presets, CanvasMode };
 export type { Coords, MovebaleElementProps, Scheme };
