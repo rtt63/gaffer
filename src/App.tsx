@@ -378,7 +378,7 @@ function Main({ leftScheme, rightScheme }: MainProps) {
       canvas?.removeEventListener("touchend", stopDrawing);
       canvas?.removeEventListener("touchcancel", stopDrawing);
     };
-  }, [preset]);
+  }, [preset, leftScheme, rightScheme]);
 
   const enableDrawMode = () => {
     const canvas = canvasRef.current;
@@ -453,9 +453,10 @@ function Main({ leftScheme, rightScheme }: MainProps) {
               height={Number(field.current?.offsetHeight)}
             />
             <Ball
+              key={preset} // force remount
               mapSchematic={grid}
               size={ballSize}
-              currentPreset={preset}
+              preset={preset}
               scheme={`${leftScheme}_${rightScheme}`}
               width={Number(field.current?.offsetWidth)}
               height={Number(field.current?.offsetHeight)}

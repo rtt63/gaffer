@@ -305,7 +305,8 @@ body {
 }
 
 .mechanics-notification {
-  opacity: 0.6;
+  opacity: 0.8;
+  margin-top: 2rem;
   max-width: 480px;
   display: block;
   text-align: center;

@@ -58,13 +58,6 @@ function Circle({ background, size, x, y, id }: CircleProps) {
   };
 
   useEffect(() => {
-    const prefedinedPosition = localStorage.getItem(id);
-    if (prefedinedPosition) {
-      setPosition(JSON.parse(prefedinedPosition));
-    }
-  }, [id]);
-
-  useEffect(() => {
     function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (
         inputRef.current &&
@@ -75,6 +68,15 @@ function Circle({ background, size, x, y, id }: CircleProps) {
       }
     }
 
+    function restorePosition() {
+      const predefinedPosition = localStorage.getItem(id);
+      if (predefinedPosition) {
+        setPosition(JSON.parse(predefinedPosition));
+      }
+    }
+
+    restorePosition();
+
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("touchstart", handleClickOutside);
 
@@ -82,12 +84,16 @@ function Circle({ background, size, x, y, id }: CircleProps) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, []);
+  }, [id]);
 
   useEffect(() => {
+    function savePosition() {
+      localStorage.setItem(id, JSON.stringify(position));
+    }
+
     const stopDrag = () => {
       dragging.current = false;
-      localStorage.setItem(id, JSON.stringify(position));
+      savePosition();
     };
 
     window.addEventListener("mousemove", onDrag);
