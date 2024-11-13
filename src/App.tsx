@@ -26,6 +26,7 @@ import {
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
 import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
+import Refresh from "./screens/Refresh";
 
 import { isWideScreen } from "./utils/isWideScreen";
 import { saveCanvasState, restoreCanvasState } from "./utils/memo";
@@ -80,6 +81,10 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   });
+
+  if (setupProgress === SetupState.Refreshing) {
+    return <Refresh />;
+  }
 
   if (setupProgress === SetupState.ChooseFormat) {
     return (
