@@ -437,7 +437,11 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
               "preset-button",
               preset === Presets.Preset1 && "preset-button-active",
             ])}
-            onClick={() => setPreset(Presets.Preset1)}
+            onClick={() => {
+              setPreset(Presets.Preset1);
+              setPointerEventsDisabled(true);
+              setMode(Mode.Move);
+            }}
           >
             Preset 1
           </button>
@@ -446,7 +450,11 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
               "preset-button",
               preset === Presets.Preset2 && "preset-button-active",
             ])}
-            onClick={() => setPreset(Presets.Preset2)}
+            onClick={() => {
+              setPreset(Presets.Preset2);
+              setPointerEventsDisabled(true);
+              setMode(Mode.Move);
+            }}
           >
             Preset 2
           </button>
@@ -455,7 +463,11 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
               "preset-button",
               preset === Presets.Preset3 && "preset-button-active",
             ])}
-            onClick={() => setPreset(Presets.Preset3)}
+            onClick={() => {
+              setPointerEventsDisabled(true);
+              setMode(Mode.Move);
+              setPreset(Presets.Preset3);
+            }}
           >
             Preset 3
           </button>
