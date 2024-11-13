@@ -66,6 +66,10 @@ function App() {
   const [l_scheme, set_l_scheme] = useState<Scheme | null>(null);
   const [r_scheme, set_r_scheme] = useState<Scheme | null>(null);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  });
+
   if (setupProgress === SetupState.ChooseFormat) {
     return (
       <WelcomeScreen
