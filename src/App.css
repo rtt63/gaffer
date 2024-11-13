@@ -406,14 +406,11 @@ body {
   text-transform: uppercase;
   cursor: pointer;
   font-weight: 300;
-
-  &:hover {
-    opacity: 0.6;
-  }
+  color: rgba(0, 0, 0, 0.8);
 }
 
 .preset-button-active {
-  background: #57fe20;
+  background: #a7ffa0;
   cursor: auto;
 
   &:hover {
