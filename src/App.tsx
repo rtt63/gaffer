@@ -286,6 +286,8 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
     };
 
     const draw = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+
       const event = e as PointerEvent | TouchEvent;
 
       if (points.length > 0 && canvas) {

@@ -44,6 +44,8 @@ function Circle({ background, size, x, y, id }: CircleProps) {
   };
 
   const onDrag = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+
     if (!dragging.current) return;
 
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
