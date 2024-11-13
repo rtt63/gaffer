@@ -42,4 +42,49 @@ function restoreCanvasState({ preset, sl, sr, w, h }: CanvasStateParams) {
   }
 }
 
-export { saveCanvasState, restoreCanvasState };
+function savePresetCustomValue({
+  preset,
+  sl,
+  sr,
+  w,
+  h,
+  value,
+}: {
+  preset: Presets;
+  sl: Scheme;
+  sr: Scheme;
+  w: number;
+  h: number;
+  value: string;
+}) {
+  const key = `${preset}_${sl}_${sr}_${w}_${h}_value`;
+
+  localStorage.setItem(key, value);
+}
+
+function restorePresetCustomValue({
+  preset,
+  sl,
+  sr,
+  w,
+  h,
+}: {
+  preset: Presets;
+  sl: Scheme;
+  sr: Scheme;
+  w: number;
+  h: number;
+}): string | Presets {
+  const key = `${preset}_${sl}_${sr}_${w}_${h}_value`;
+
+  const customValue = localStorage.getItem(key);
+
+  return customValue || preset;
+}
+
+export {
+  saveCanvasState,
+  restoreCanvasState,
+  savePresetCustomValue,
+  restorePresetCustomValue,
+};

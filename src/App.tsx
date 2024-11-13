@@ -29,7 +29,12 @@ import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
 import Refresh from "./screens/Refresh";
 
 import { isWideScreen } from "./utils/isWideScreen";
-import { saveCanvasState, restoreCanvasState } from "./utils/memo";
+import {
+  saveCanvasState,
+  restoreCanvasState,
+  savePresetCustomValue,
+  restorePresetCustomValue,
+} from "./utils/memo";
 
 const getPlayerSize = (): number => {
   const size = getDeviceSize();
@@ -166,6 +171,102 @@ const MenuButton = ({
       ])}
     >
       {children}
+    </button>
+  );
+};
+
+const PresetButton = ({
+  preset,
+  currentPreset,
+  onClick,
+  sl,
+  sr,
+  w,
+  h,
+}: {
+  preset: Presets;
+  currentPreset: Presets;
+  onClick: () => void;
+  sl: Scheme;
+  sr: Scheme;
+  w: number;
+  h: number;
+}) => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [value, setValue] = useState(
+    restorePresetCustomValue({ preset, sl, sr, w, h })
+  );
+  const [isEditing, setEditing] = useState(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
+      if (
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        inputRef.current.blur();
+        savePresetCustomValue({
+          preset: preset,
+          w,
+          h,
+          sr,
+          sl,
+          value,
+        });
+        setEditing(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [h, sl, sr, w, preset, value]);
+
+  return (
+    <button
+      className={clsx([
+        "preset-button",
+        preset === currentPreset && "preset-button-active",
+      ])}
+      onClick={onClick}
+      onDoubleClick={() => setEditing(true)}
+    >
+      {isEditing ? (
+        <form
+          className="preset-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setEditing(false);
+            savePresetCustomValue({
+              preset: preset,
+              w,
+              h,
+              sr,
+              sl,
+              value,
+            });
+          }}
+        >
+          <input
+            ref={inputRef}
+            className="preset-input"
+            value={value}
+            onChange={(e) => {
+              const updValue = e.target.value;
+              if (updValue.length > 12) {
+                return;
+              }
+              setValue(e.target.value);
+            }}
+          />
+        </form>
+      ) : (
+        value
+      )}
     </button>
   );
 };
@@ -431,47 +532,49 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
   return (
     <div>
       <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>
-        <div className="presets">
-          <button
-            className={clsx([
-              "preset-button",
-              preset === Presets.Preset1 && "preset-button-active",
-            ])}
-            onClick={() => {
-              setPreset(Presets.Preset1);
-              setPointerEventsDisabled(true);
-              setMode(Mode.Move);
-            }}
-          >
-            Preset 1
-          </button>
-          <button
-            className={clsx([
-              "preset-button",
-              preset === Presets.Preset2 && "preset-button-active",
-            ])}
-            onClick={() => {
-              setPreset(Presets.Preset2);
-              setPointerEventsDisabled(true);
-              setMode(Mode.Move);
-            }}
-          >
-            Preset 2
-          </button>
-          <button
-            className={clsx([
-              "preset-button",
-              preset === Presets.Preset3 && "preset-button-active",
-            ])}
-            onClick={() => {
-              setPointerEventsDisabled(true);
-              setMode(Mode.Move);
-              setPreset(Presets.Preset3);
-            }}
-          >
-            Preset 3
-          </button>
-        </div>
+        {Boolean(field.current?.offsetWidth) && (
+          <div className="presets">
+            <PresetButton
+              onClick={() => {
+                setPreset(Presets.Preset1);
+                setPointerEventsDisabled(true);
+                setMode(Mode.Move);
+              }}
+              sl={leftScheme}
+              sr={rightScheme}
+              preset={Presets.Preset1}
+              currentPreset={preset}
+              w={Number(field.current?.offsetWidth)}
+              h={Number(field.current?.offsetHeight)}
+            />
+            <PresetButton
+              onClick={() => {
+                setPreset(Presets.Preset2);
+                setPointerEventsDisabled(true);
+                setMode(Mode.Move);
+              }}
+              sl={leftScheme}
+              sr={rightScheme}
+              preset={Presets.Preset2}
+              currentPreset={preset}
+              w={Number(field.current?.offsetWidth)}
+              h={Number(field.current?.offsetHeight)}
+            />
+            <PresetButton
+              onClick={() => {
+                setPreset(Presets.Preset3);
+                setPointerEventsDisabled(true);
+                setMode(Mode.Move);
+              }}
+              sl={leftScheme}
+              sr={rightScheme}
+              preset={Presets.Preset3}
+              currentPreset={preset}
+              w={Number(field.current?.offsetWidth)}
+              h={Number(field.current?.offsetHeight)}
+            />
+          </div>
+        )}
 
         {grid && (
           <>
@@ -528,7 +631,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
             setMode(Mode.Move);
           }}
         >
-          <img src={circleSvg} width="60" height="60" />
+          <img src={circleSvg} />
         </MenuButton>
         <MenuButton
           isChecked={mode === Mode.Draw}
@@ -538,7 +641,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
             enableDrawMode();
           }}
         >
-          <img src={pencilSvg} width="60" height="60" />
+          <img src={pencilSvg} />
         </MenuButton>
         <MenuButton
           isChecked={mode === Mode.Erase}
@@ -548,7 +651,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
             enableEraserMode();
           }}
         >
-          <img src={eraserSvg} width="60" height="60" />
+          <img src={eraserSvg} />
         </MenuButton>
       </div>
       <ScreenOrientationBlocker />
