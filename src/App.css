@@ -260,7 +260,6 @@ body {
   align-items: flex-end;
   justify-content: flex-end;
   margin: 0;
-  pointer-events: none;
   z-index: 6;
 
   h1 {
@@ -530,4 +529,18 @@ body {
   font-weight: 400;
   text-transform: uppercase;
   font-family: "Lexend", sans-serif;
+}
+
+.watermark {
+  display: flex;
+  opacity: 0.4;
+  font-weight: 200;
+
+  a {
+    cursor: pointer;
+    opacity: 1;
+    font-weight: 700;
+    color: #bf4115;
+    text-decoration: none;
+  }
 }

@@ -43,7 +43,13 @@ function WelcomeScreen({ setFormat }: Props) {
           </span>
         </div>
         <div className="gaffer-title">
-          <h1>GAFFER</h1>
+          <h1>GAFFFER</h1>
+          <span className="watermark">
+            built by&nbsp;
+            <a target="_blank" href="https://rtt63.com">
+              rtt63
+            </a>
+          </span>
         </div>
         <ScreenOrientationBlocker />
       </div>
