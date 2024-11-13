@@ -7,6 +7,7 @@ import { LeftTeam, RightTeam } from "./components/Teams";
 import circleSvg from "./assets/circle.svg";
 import pencilSvg from "./assets/pencil.svg";
 import eraserSvg from "./assets/eraser.svg";
+import homeSvg from "./assets/home.svg";
 
 import { createGrid } from "./utils/createGrid";
 import { getDeviceSize } from "./utils/getDeviceSize.ts";
@@ -117,7 +118,15 @@ function App() {
   }
 
   if (l_scheme && r_scheme) {
-    return <Main leftScheme={l_scheme} rightScheme={r_scheme} />;
+    return (
+      <Main
+        leftScheme={l_scheme}
+        rightScheme={r_scheme}
+        toHome={() => {
+          setSetupProgress(SetupState.ChooseFormat);
+        }}
+      />
+    );
   }
 
   return null;
@@ -148,6 +157,7 @@ const MenuButton = ({
 interface MainProps {
   leftScheme: Scheme;
   rightScheme: Scheme;
+  toHome: () => void;
 }
 
 type FixedHeightStyles = {
@@ -166,7 +176,7 @@ type FieldFixedSizes =
   | FixedHeightStyles
   | FixedWidthAndHeightStyles;
 
-function Main({ leftScheme, rightScheme }: MainProps) {
+function Main({ leftScheme, rightScheme, toHome }: MainProps) {
   const field = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
@@ -511,6 +521,9 @@ function Main({ leftScheme, rightScheme }: MainProps) {
         </MenuButton>
       </div>
       <ScreenOrientationBlocker />
+      <button className="home-button" onClick={toHome}>
+        <img src={homeSvg} />
+      </button>
     </div>
   );
 }

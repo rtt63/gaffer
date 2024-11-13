@@ -26,6 +26,8 @@ enum Presets {
   Preset1 = "Preset1",
   Preset2 = "Preset2",
   Preset3 = "Preset3",
+  Preset4 = "Preset4",
+  Preset5 = "Preset5",
 }
 type Scheme =
   | "4-3-3"
