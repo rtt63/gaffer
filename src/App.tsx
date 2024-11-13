@@ -8,6 +8,7 @@ import circleSvg from "./assets/circle.svg";
 import pencilSvg from "./assets/pencil.svg";
 import eraserSvg from "./assets/eraser.svg";
 import homeSvg from "./assets/home.svg";
+import resetSvg from "./assets/reset.svg";
 
 import { createGrid } from "./utils/createGrid";
 import { getDeviceSize } from "./utils/getDeviceSize.ts";
@@ -52,6 +53,7 @@ enum SetupState {
   ChooseFormat,
   ChooseLeftTeamScheme,
   ChooseRightTeamScheme,
+  Refreshing,
   Main,
 }
 
@@ -66,6 +68,14 @@ function App() {
   const [format, setFormat] = useState<Format | null>(null);
   const [l_scheme, set_l_scheme] = useState<Scheme | null>(null);
   const [r_scheme, set_r_scheme] = useState<Scheme | null>(null);
+
+  const handleRefresh = () => {
+    localStorage.clear();
+    setSetupProgress(SetupState.Refreshing);
+    setTimeout(() => {
+      setSetupProgress(SetupState.Main);
+    }, 2000);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -117,7 +127,7 @@ function App() {
     );
   }
 
-  if (l_scheme && r_scheme) {
+  if (l_scheme && r_scheme && setupProgress === SetupState.Main) {
     return (
       <Main
         leftScheme={l_scheme}
@@ -125,6 +135,7 @@ function App() {
         toHome={() => {
           setSetupProgress(SetupState.ChooseFormat);
         }}
+        handleRefresh={handleRefresh}
       />
     );
   }
@@ -158,6 +169,7 @@ interface MainProps {
   leftScheme: Scheme;
   rightScheme: Scheme;
   toHome: () => void;
+  handleRefresh: () => void;
 }
 
 type FixedHeightStyles = {
@@ -176,7 +188,7 @@ type FieldFixedSizes =
   | FixedHeightStyles
   | FixedWidthAndHeightStyles;
 
-function Main({ leftScheme, rightScheme, toHome }: MainProps) {
+function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
   const field = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
@@ -523,6 +535,9 @@ function Main({ leftScheme, rightScheme, toHome }: MainProps) {
       <ScreenOrientationBlocker />
       <button className="home-button" onClick={toHome}>
         <img src={homeSvg} />
+      </button>
+      <button className="reset" onClick={handleRefresh}>
+        <img src={resetSvg} />
       </button>
     </div>
   );

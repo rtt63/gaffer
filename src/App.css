@@ -424,7 +424,7 @@ body {
   top: 50%;
   transform: translateY(-50%);
   padding: 0.5rem;
-  background: #eff1f0;
+  background: transparent;
   border-top-right-radius: 1rem;
   cursor: pointer;
   border: none;
@@ -440,5 +440,29 @@ body {
     height: auto;
     object-fit: contain;
     transition: transform 150ms ease-in;
+  }
+}
+
+.reset {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  border: none;
+  padding: 0.5rem;
+  background: transparent;
+
+  img {
+    width: 2rem;
+    height: auto;
+    object-fit: contain;
+    transition: transform 150ms ease-in;
+  }
+
+  &:hover {
+    img {
+      transform: scale(1.2);
+    }
   }
 }
