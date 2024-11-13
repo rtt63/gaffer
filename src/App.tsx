@@ -399,8 +399,6 @@ function Main({ leftScheme, rightScheme }: MainProps) {
     }
   };
 
-  console.log(preset);
-
   return (
     <div>
       <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>

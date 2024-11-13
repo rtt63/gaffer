@@ -114,6 +114,10 @@ function Circle({ background, size, x, y, id }: CircleProps) {
   return (
     <div
       onDoubleClick={() => {
+        if (background === "ball") {
+          return;
+        }
+
         setEditing(true);
       }}
       style={{
