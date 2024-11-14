@@ -3,11 +3,11 @@ import { DeviceSize } from "../constants";
 const getDeviceSize = (): DeviceSize => {
   const w = window.innerWidth;
 
-  if (w < 900) {
+  if (w < 1000) {
     return DeviceSize.S;
   }
 
-  if (w < 1100) {
+  if (w < 1400) {
     return DeviceSize.M;
   }
 

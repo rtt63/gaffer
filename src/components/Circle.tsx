@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import clsx from "clsx";
 import "../App.css";
 
-import { Coords } from "../constants";
+import { Coords, DeviceSize } from "../constants";
+
+import { getDeviceSize } from "../utils/getDeviceSize";
 
 type Background = string;
 
@@ -116,7 +118,7 @@ function Circle({ background, size, x, y, id }: CircleProps) {
   return (
     <div
       onDoubleClick={() => {
-        if (background === "ball") {
+        if (background === "ball" || getDeviceSize() === DeviceSize.S) {
           return;
         }
 

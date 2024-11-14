@@ -39,9 +39,10 @@ import {
 const getPlayerSize = (): number => {
   const size = getDeviceSize();
 
-  if (size === DeviceSize.S) return 28;
-  if (size === DeviceSize.M) return 44;
-  return 54;
+  if (size === DeviceSize.S) return 24;
+  if (size === DeviceSize.M) return 34;
+
+  return 40;
 };
 
 const getBallSize = () => getPlayerSize() / 2;
@@ -211,8 +212,12 @@ const PresetButton = ({
           h,
           sr,
           sl,
-          value,
+          value: value || preset,
         });
+        if (!value.trim()) {
+          setValue(preset);
+        }
+
         setEditing(false);
       }
     }
@@ -247,14 +252,19 @@ const PresetButton = ({
               h,
               sr,
               sl,
-              value,
+              value: value || preset,
             });
+            if (!value.trim()) {
+              setValue(preset);
+            }
           }}
         >
           <input
             ref={inputRef}
             className="preset-input"
             value={value}
+            autoFocus={true}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => {
               const updValue = e.target.value;
               if (updValue.length > 12) {
