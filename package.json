@@ -12,7 +12,8 @@
   "dependencies": {
     "perfect-freehand": "^1.2.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-lottie-player": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

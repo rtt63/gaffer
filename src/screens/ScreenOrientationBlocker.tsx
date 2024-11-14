@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import Lottie from "react-lottie-player";
 
 import tablet from "../assets/tablet.svg";
 import display from "../assets/display.svg";
+import lottieRotateJson from "../assets/lottieRotate.json";
 
 function ScreenOrientationBlocker() {
   const [isPortrait, setIsPortrait] = useState(false);
@@ -21,23 +23,13 @@ function ScreenOrientationBlocker() {
 
   if (isPortrait) {
     return (
-      <div className="screen-lock-container">
-        <div>
-          <h2>You need a landscape mode like this</h2>
-          <div className="good-examples">
-            <img className="lock-screen-icon-size" src={`${display}`} />
-            <span>or this</span>
-            <img
-              className="lock-screen-icon-size transform-90-deg"
-              src={`${tablet}`}
-            />
-          </div>
-        </div>
-        <div className="bad-examples">
-          <span className="space-top">Not like this</span>
-          <img className="lock-screen-icon-size" src={`${tablet}`} />
-        </div>
-      </div>
+      <Lottie
+        loop
+        animationData={lottieRotateJson}
+        play
+        className="screen-lock-container"
+        rendererSettings={{ preserveAspectRatio: "xMidYMid slice" }}
+      />
     );
   }
 
