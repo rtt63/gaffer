@@ -35,6 +35,7 @@ function InitialSchemeScreen({ format, setScheme, side }: Props) {
           </b>{" "}
           side
         </h1>
+
         {format === Format.Eleven && (
           <>
             <button
@@ -69,6 +70,30 @@ function InitialSchemeScreen({ format, setScheme, side }: Props) {
             </button>
           </>
         )}
+
+        {format === Format.Seven && (
+          <>
+            <button
+              onClick={() => setScheme("3-3")}
+              className="choose-format-button"
+            >
+              3-3
+            </button>
+            <button
+              onClick={() => setScheme("2-3-1")}
+              className="choose-format-button"
+            >
+              2-3-1
+            </button>
+            <button
+              className="choose-format-button"
+              onClick={() => setScheme("none")}
+            >
+              Blank
+            </button>
+          </>
+        )}
+
         {format === Format.Five && (
           <>
             <button

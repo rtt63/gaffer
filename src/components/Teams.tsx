@@ -228,6 +228,33 @@ const getPositionsForScheme = (
       return [LB, CB, RB, LW, ST, RW].filter((v) => !!v);
     }
   }
+  if (scheme === "2-3-1") {
+    if (side === Side.Left) {
+      const LB = map.get("2-2");
+      const RB = map.get("6-2");
+
+      const LM = map.get("1-5");
+      const CM = map.get("4-5");
+      const RM = map.get("7-5");
+
+      const ST = map.get("4-8");
+
+      return [LB, RB, LM, CM, RM, ST].filter((v) => !!v);
+    }
+
+    if (side === Side.Right) {
+      const LB = map.get("2-16");
+      const RB = map.get("6-16");
+
+      const LM = map.get("1-13");
+      const CM = map.get("4-13");
+      const RM = map.get("7-13");
+
+      const ST = map.get("4-10");
+
+      return [LB, RB, LM, CM, RM, ST].filter((v) => !!v);
+    }
+  }
 
   if (scheme === "none") {
     if (side === Side.Left) {

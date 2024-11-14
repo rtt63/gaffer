@@ -90,15 +90,6 @@ function App() {
     );
   }
 
-  if (
-    setupProgress === SetupState.ChooseLeftTeamScheme &&
-    format === Format.Seven
-  ) {
-    set_l_scheme("3-3");
-    set_r_scheme("3-3");
-    setSetupProgress(SetupState.Main);
-  }
-
   if (setupProgress === SetupState.ChooseLeftTeamScheme && format !== null) {
     return (
       <InitialSchemeScreen
