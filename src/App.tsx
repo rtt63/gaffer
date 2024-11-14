@@ -11,17 +11,17 @@ import homeSvg from "./assets/home.svg";
 import resetSvg from "./assets/reset.svg";
 
 import { createGrid } from "./utils/createGrid";
-import { getDeviceSize } from "./utils/getDeviceSize.ts";
 import {
   Colors,
   Format,
   Scheme,
   Side,
   Coords,
-  DeviceSize,
   Presets,
   CanvasMode,
 } from "./constants";
+
+import MenuButton from "./components/MenuButton";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
@@ -29,26 +29,13 @@ import ScreenOrientationBlocker from "./screens/ScreenOrientationBlocker";
 import Refresh from "./screens/Refresh";
 
 import { isWideScreen } from "./utils/isWideScreen";
+import { playerSize, ballSize } from "./utils/getSizes";
 import {
   saveCanvasState,
   restoreCanvasState,
   savePresetCustomValue,
   restorePresetCustomValue,
 } from "./utils/memo";
-
-const getPlayerSize = (): number => {
-  const size = getDeviceSize();
-
-  if (size === DeviceSize.S) return 24;
-  if (size === DeviceSize.M) return 34;
-
-  return 40;
-};
-
-const getBallSize = () => getPlayerSize() / 2;
-
-const playerSize = getPlayerSize();
-const ballSize = getBallSize();
 
 enum Mode {
   Move,
@@ -153,28 +140,6 @@ function App() {
 
   return null;
 }
-
-interface MainButtonProps {
-  isChecked: boolean;
-  onClick: () => void;
-}
-const MenuButton = ({
-  isChecked,
-  onClick,
-  children,
-}: React.PropsWithChildren<MainButtonProps>) => {
-  return (
-    <button
-      onClick={onClick}
-      className={clsx([
-        "menu-button",
-        isChecked ? "menu-button-checked" : "menu-button-inactive",
-      ])}
-    >
-      {children}
-    </button>
-  );
-};
 
 const PresetButton = ({
   preset,
@@ -539,6 +504,12 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
     }
   };
 
+  const handleSetPresetClick = (prst: Presets): void => {
+    setPreset(prst);
+    setPointerEventsDisabled(true);
+    setMode(Mode.Move);
+  };
+
   return (
     <div>
       <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>
@@ -546,9 +517,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
           <div className="presets">
             <PresetButton
               onClick={() => {
-                setPreset(Presets.Preset1);
-                setPointerEventsDisabled(true);
-                setMode(Mode.Move);
+                handleSetPresetClick(Presets.Preset1);
               }}
               sl={leftScheme}
               sr={rightScheme}
@@ -559,9 +528,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
             />
             <PresetButton
               onClick={() => {
-                setPreset(Presets.Preset2);
-                setPointerEventsDisabled(true);
-                setMode(Mode.Move);
+                handleSetPresetClick(Presets.Preset2);
               }}
               sl={leftScheme}
               sr={rightScheme}
@@ -572,9 +539,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
             />
             <PresetButton
               onClick={() => {
-                setPreset(Presets.Preset3);
-                setPointerEventsDisabled(true);
-                setMode(Mode.Move);
+                handleSetPresetClick(Presets.Preset3);
               }}
               sl={leftScheme}
               sr={rightScheme}
