@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import Lottie from "react-lottie-player";
 
-import tablet from "../assets/tablet.svg";
-import display from "../assets/display.svg";
 import lottieRotateJson from "../assets/lottieRotate.json";
 
 function ScreenOrientationBlocker() {
