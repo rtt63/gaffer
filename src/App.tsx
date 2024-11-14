@@ -20,6 +20,7 @@ import { Colors, Format, Side, Presets, CanvasMode } from "./constants";
 
 import MenuButton from "./components/MenuButton";
 import ContextProvider from "./components/Context";
+import PresetButton from "./components/PresetButton";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
@@ -28,12 +29,7 @@ import Refresh from "./screens/Refresh";
 
 import { isWideScreen } from "./utils/isWideScreen";
 import { playerSize, ballSize } from "./utils/getSizes";
-import {
-  saveCanvasState,
-  restoreCanvasState,
-  savePresetCustomValue,
-  restorePresetCustomValue,
-} from "./utils/memo";
+import { saveCanvasState, restoreCanvasState } from "./utils/memo";
 
 enum Mode {
   Move,
@@ -128,113 +124,6 @@ function App() {
   return null;
 }
 
-const PresetButton = ({
-  preset,
-  onClick,
-}: {
-  preset: Presets;
-  onClick: () => void;
-}) => {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const { left, right } = useSchemes();
-  const { w, h } = useFieldSizes();
-  const [value, setValue] = useState(
-    restorePresetCustomValue({ preset, sl: left, sr: right, w, h })
-  );
-  const [isEditing, setEditing] = useState(false);
-
-  const { current: currentPreset } = usePresets();
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent | TouchEvent) {
-      if (
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node) &&
-        right &&
-        left &&
-        h &&
-        w
-      ) {
-        inputRef.current.blur();
-        savePresetCustomValue({
-          preset: preset,
-          w,
-          h,
-          sr: right,
-          sl: left,
-          value: value || preset,
-        });
-        if (!value.trim()) {
-          setValue(preset);
-        }
-
-        setEditing(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [h, w, left, right, preset, value]);
-
-  return (
-    <button
-      className={clsx([
-        "preset-button",
-        preset === currentPreset && "preset-button-active",
-      ])}
-      onClick={onClick}
-      onDoubleClick={() => setEditing(true)}
-    >
-      {isEditing ? (
-        <form
-          className="preset-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setEditing(false);
-
-            if (w && h) {
-              savePresetCustomValue({
-                preset: preset,
-                w,
-                h,
-                sr: right,
-                sl: left,
-                value: value || preset,
-              });
-            }
-
-            if (!value.trim()) {
-              setValue(preset);
-            }
-          }}
-        >
-          <input
-            ref={inputRef}
-            className="preset-input"
-            value={value}
-            autoFocus={true}
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => {
-              const updValue = e.target.value;
-              if (updValue.length > 12) {
-                return;
-              }
-              setValue(e.target.value);
-            }}
-          />
-        </form>
-      ) : (
-        value
-      )}
-    </button>
-  );
-};
-
 interface MainProps {
   toHome: () => void;
   handleRefresh: () => void;
@@ -278,25 +167,25 @@ function Main({ toHome, handleRefresh }: MainProps) {
 
   useEffect(() => {
     if (field.current) {
-      const fieldWidth = field.current.offsetWidth;
-      const fieldHeight = field.current.offsetHeight;
-
-      setField({ w: fieldWidth, h: fieldHeight });
-
-      const grid = createGrid({ width: fieldWidth, height: fieldHeight });
+      const w = field.current.offsetWidth;
+      const h = field.current.offsetHeight;
 
       setFieldFixedSizes({
-        minWidth: fieldWidth + "px",
-        width: fieldWidth + "px",
-        maxWidth: fieldWidth + "px",
-        minHeight: fieldHeight + "px",
-        height: fieldHeight + "px",
-        maxHeight: fieldHeight + "px",
+        minWidth: w + "px",
+        width: w + "px",
+        maxWidth: w + "px",
+        minHeight: h + "px",
+        height: h + "px",
+        maxHeight: h + "px",
       });
 
+      setField({ w, h });
+      const grid = createGrid({ width: w, height: h });
       setGrid(grid);
     }
+  }, []);
 
+  useEffect(() => {
     const canvas = canvasRef.current;
 
     const ctx = canvas?.getContext("2d");
@@ -502,28 +391,37 @@ function Main({ toHome, handleRefresh }: MainProps) {
     setMode(Mode.Move);
   };
 
+  const w = field.current?.offsetWidth;
+  const h = field.current?.offsetHeight;
+
   return (
     <div>
       <div ref={field} id="field" className={"field"} style={fieldFixedSizes}>
-        {Boolean(field.current?.offsetWidth) && (
+        {w && h && (
           <div className="presets">
             <PresetButton
               onClick={() => {
                 handleSetPresetClick(Presets.Preset1);
               }}
               preset={Presets.Preset1}
+              w={w}
+              h={h}
             />
             <PresetButton
               onClick={() => {
                 handleSetPresetClick(Presets.Preset2);
               }}
               preset={Presets.Preset2}
+              w={w}
+              h={h}
             />
             <PresetButton
               onClick={() => {
                 handleSetPresetClick(Presets.Preset3);
               }}
               preset={Presets.Preset3}
+              w={w}
+              h={h}
             />
           </div>
         )}

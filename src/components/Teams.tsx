@@ -299,10 +299,7 @@ const getPositionsForScheme = (
   return defaultArray;
 };
 
-type TeamProps = MovebaleElementProps & {
-  width: number;
-  height: number;
-};
+type TeamProps = MovebaleElementProps;
 
 const generateId = (
   id: number | string,
