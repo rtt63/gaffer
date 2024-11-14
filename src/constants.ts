@@ -14,7 +14,6 @@ interface Coords {
 }
 interface MovebaleElementProps {
   size: number;
-  mapSchematic: Map<string, Coords>;
 }
 
 enum DeviceSize {

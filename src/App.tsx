@@ -10,18 +10,16 @@ import eraserSvg from "./assets/eraser.svg";
 import homeSvg from "./assets/home.svg";
 import resetSvg from "./assets/reset.svg";
 
+import { useSchemes } from "./hooks/useSchemes";
+import { usePresets } from "./hooks/usePresets";
+import { useGrid } from "./hooks/useGrid";
+import { useFieldSizes } from "./hooks/useFieldSizes";
+
 import { createGrid } from "./utils/createGrid";
-import {
-  Colors,
-  Format,
-  Scheme,
-  Side,
-  Coords,
-  Presets,
-  CanvasMode,
-} from "./constants";
+import { Colors, Format, Side, Presets, CanvasMode } from "./constants";
 
 import MenuButton from "./components/MenuButton";
+import ContextProvider from "./components/Context";
 
 import WelcomeScreen from "./screens/WelcomeScreen";
 import InitialSchemeScreen from "./screens/InitialSchemeScreen";
@@ -60,8 +58,8 @@ type Width = number;
 function App() {
   const [setupProgress, setSetupProgress] = useState(SetupState.ChooseFormat);
   const [format, setFormat] = useState<Format | null>(null);
-  const [l_scheme, set_l_scheme] = useState<Scheme | null>(null);
-  const [r_scheme, set_r_scheme] = useState<Scheme | null>(null);
+
+  const { left, right, updateLeft, updateRight } = useSchemes();
 
   const handleRefresh = () => {
     localStorage.clear();
@@ -96,7 +94,7 @@ function App() {
         side={Side.Left}
         format={format}
         setScheme={(scheme) => {
-          set_l_scheme(scheme);
+          updateLeft(scheme);
           setSetupProgress(SetupState.ChooseRightTeamScheme);
         }}
       />
@@ -109,18 +107,16 @@ function App() {
         side={Side.Right}
         format={format}
         setScheme={(scheme) => {
-          set_r_scheme(scheme);
+          updateRight(scheme);
           setSetupProgress(SetupState.Main);
         }}
       />
     );
   }
 
-  if (l_scheme && r_scheme && setupProgress === SetupState.Main) {
+  if (left && right && setupProgress === SetupState.Main) {
     return (
       <Main
-        leftScheme={l_scheme}
-        rightScheme={r_scheme}
         toHome={() => {
           setSetupProgress(SetupState.ChooseFormat);
         }}
@@ -134,40 +130,38 @@ function App() {
 
 const PresetButton = ({
   preset,
-  currentPreset,
   onClick,
-  sl,
-  sr,
-  w,
-  h,
 }: {
   preset: Presets;
-  currentPreset: Presets;
   onClick: () => void;
-  sl: Scheme;
-  sr: Scheme;
-  w: number;
-  h: number;
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const { left, right } = useSchemes();
+  const { w, h } = useFieldSizes();
   const [value, setValue] = useState(
-    restorePresetCustomValue({ preset, sl, sr, w, h })
+    restorePresetCustomValue({ preset, sl: left, sr: right, w, h })
   );
   const [isEditing, setEditing] = useState(false);
+
+  const { current: currentPreset } = usePresets();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (
         inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
+        !inputRef.current.contains(event.target as Node) &&
+        right &&
+        left &&
+        h &&
+        w
       ) {
         inputRef.current.blur();
         savePresetCustomValue({
           preset: preset,
           w,
           h,
-          sr,
-          sl,
+          sr: right,
+          sl: left,
           value: value || preset,
         });
         if (!value.trim()) {
@@ -185,7 +179,7 @@ const PresetButton = ({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [h, sl, sr, w, preset, value]);
+  }, [h, w, left, right, preset, value]);
 
   return (
     <button
@@ -202,14 +196,18 @@ const PresetButton = ({
           onSubmit={(e) => {
             e.preventDefault();
             setEditing(false);
-            savePresetCustomValue({
-              preset: preset,
-              w,
-              h,
-              sr,
-              sl,
-              value: value || preset,
-            });
+
+            if (w && h) {
+              savePresetCustomValue({
+                preset: preset,
+                w,
+                h,
+                sr: right,
+                sl: left,
+                value: value || preset,
+              });
+            }
+
             if (!value.trim()) {
               setValue(preset);
             }
@@ -238,8 +236,6 @@ const PresetButton = ({
 };
 
 interface MainProps {
-  leftScheme: Scheme;
-  rightScheme: Scheme;
   toHome: () => void;
   handleRefresh: () => void;
 }
@@ -260,10 +256,12 @@ type FieldFixedSizes =
   | FixedHeightStyles
   | FixedWidthAndHeightStyles;
 
-function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
+function Main({ toHome, handleRefresh }: MainProps) {
   const field = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isPointerEventsDisabled, setPointerEventsDisabled] = useState(true);
+
+  const { left: leftScheme, right: rightScheme } = useSchemes();
 
   const [fieldFixedSizes, setFieldFixedSizes] = useState<FieldFixedSizes>(
     isWideScreen()
@@ -271,16 +269,19 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
       : { minWidth: "80vw", width: "80vw", maxWidth: "80vw" }
   );
 
-  const [grid, setGrid] = useState<Map<string, Coords> | null>(null);
+  const { grid, setGrid } = useGrid();
 
   const [mode, setMode] = useState(Mode.Move);
+  const { setField } = useFieldSizes();
 
-  const [preset, setPreset] = useState<Presets>(Presets.Preset1);
+  const { current: preset, updatePreset: setPreset } = usePresets();
 
   useEffect(() => {
     if (field.current) {
       const fieldWidth = field.current.offsetWidth;
       const fieldHeight = field.current.offsetHeight;
+
+      setField({ w: fieldWidth, h: fieldHeight });
 
       const grid = createGrid({ width: fieldWidth, height: fieldHeight });
 
@@ -394,7 +395,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
           ctx?.lineWidth as Width,
           points as Points[],
         ];
-        if (field.current) {
+        if (field.current && leftScheme && rightScheme) {
           const w = field.current.offsetWidth;
           const h = field.current.offsetHeight;
           saveCanvasState({
@@ -415,7 +416,7 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
 
-      if (field.current) {
+      if (field.current && leftScheme && rightScheme) {
         const w = field.current.offsetWidth;
         const h = field.current.offsetHeight;
 
@@ -510,64 +511,30 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
               onClick={() => {
                 handleSetPresetClick(Presets.Preset1);
               }}
-              sl={leftScheme}
-              sr={rightScheme}
               preset={Presets.Preset1}
-              currentPreset={preset}
-              w={Number(field.current?.offsetWidth)}
-              h={Number(field.current?.offsetHeight)}
             />
             <PresetButton
               onClick={() => {
                 handleSetPresetClick(Presets.Preset2);
               }}
-              sl={leftScheme}
-              sr={rightScheme}
               preset={Presets.Preset2}
-              currentPreset={preset}
-              w={Number(field.current?.offsetWidth)}
-              h={Number(field.current?.offsetHeight)}
             />
             <PresetButton
               onClick={() => {
                 handleSetPresetClick(Presets.Preset3);
               }}
-              sl={leftScheme}
-              sr={rightScheme}
               preset={Presets.Preset3}
-              currentPreset={preset}
-              w={Number(field.current?.offsetWidth)}
-              h={Number(field.current?.offsetHeight)}
             />
           </div>
         )}
 
         {grid && (
           <>
-            <LeftTeam
-              mapSchematic={grid}
-              size={playerSize}
-              scheme={leftScheme}
-              currentPreset={preset}
-              width={Number(field.current?.offsetWidth)}
-              height={Number(field.current?.offsetHeight)}
-            />
-            <RightTeam
-              mapSchematic={grid}
-              size={playerSize}
-              scheme={rightScheme}
-              currentPreset={preset}
-              width={Number(field.current?.offsetWidth)}
-              height={Number(field.current?.offsetHeight)}
-            />
+            <LeftTeam size={playerSize} />
+            <RightTeam size={playerSize} />
             <Ball
               key={preset} // force remount
-              mapSchematic={grid}
               size={ballSize}
-              preset={preset}
-              scheme={`${leftScheme}_${rightScheme}`}
-              width={Number(field.current?.offsetWidth)}
-              height={Number(field.current?.offsetHeight)}
             />
           </>
         )}
@@ -631,4 +598,11 @@ function Main({ leftScheme, rightScheme, toHome, handleRefresh }: MainProps) {
   );
 }
 
-export default App;
+const ContainerApp = () => {
+  return (
+    <ContextProvider>
+      <App />
+    </ContextProvider>
+  );
+};
+export default ContainerApp;
